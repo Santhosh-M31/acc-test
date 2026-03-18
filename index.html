@@ -8,17 +8,17 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --navy:   #0d2137;
-      --blue:   #1a4f8a;
-      --mid:    #2563a8;
-      --light:  #e8f0fb;
-      --border: #d0daea;
+      --navy:   #5a0000;
+      --blue:   #8b0000;
+      --mid:    #b40000;
+      --light:  #fdf2f2;
+      --border: #e6cccc;
       --text:   #1a202c;
       --muted:  #64748b;
       --green:  #1e7e4a;
       --green-bg: #edfaf3;
       --white:  #ffffff;
-      --bg:     #f1f4f9;
+      --bg:     #f7f2f2;
       --ribbon-h: 58px;
     }
 
@@ -72,37 +72,7 @@
       white-space: nowrap;
       flex-shrink: 0;
     }
-    .ribbon-divider {
-      width: 1px;
-      height: 28px;
-      background: rgba(255,255,255,0.2);
-      flex-shrink: 0;
-    }
-    .ribbon-progress {
-      flex: 1;
-      min-width: 0;
-    }
-    .ribbon-progress-label {
-      display: flex;
-      justify-content: space-between;
-      color: rgba(255,255,255,0.7);
-      font-size: 0.7rem;
-      margin-bottom: 4px;
-      letter-spacing: 0.3px;
-    }
-    .ribbon-bar-bg {
-      background: rgba(255,255,255,0.15);
-      border-radius: 99px;
-      height: 5px;
-      overflow: hidden;
-    }
-    .ribbon-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #3b82f6, #22c55e);
-      border-radius: 99px;
-      transition: width 0.3s;
-      width: 0%;
-    }
+    .ribbon-spacer { flex: 1; }
     .ribbon-submit-btn {
       background: #1e7e4a;
       color: white;
@@ -342,16 +312,7 @@
 <div class="ribbon">
   <img src="tec_solution_pro_logo.jpg" alt="Logo" class="ribbon-logo" />
   <span class="ribbon-company">Tec Solution Pro</span>
-  <div class="ribbon-divider"></div>
-  <div class="ribbon-progress">
-    <div class="ribbon-progress-label">
-      <span>Checklist Progress</span>
-      <span id="progress-text">0 / 0</span>
-    </div>
-    <div class="ribbon-bar-bg">
-      <div class="ribbon-bar-fill" id="progress-fill"></div>
-    </div>
-  </div>
+  <div class="ribbon-spacer"></div>
   <button type="button" class="ribbon-submit-btn" id="ribbon-submit-btn">Submit Checklist</button>
 </div>
 
@@ -592,17 +553,9 @@
 <footer>Tec Solution Pro &nbsp;&mdash;&nbsp; Pre-Flight Checklist &nbsp;&mdash;&nbsp; DJI Matrice 400 &amp; Mavic 3 Multispectral</footer>
 
 <script>
-  const allBoxes  = document.querySelectorAll('input[type="checkbox"]');
-  const fillEl    = document.getElementById('progress-fill');
-  const textEl    = document.getElementById('progress-text');
+  const allBoxes = document.querySelectorAll('input[type="checkbox"]');
 
-  function updateProgress() {
-    const total   = allBoxes.length;
-    const checked = document.querySelectorAll('input[type="checkbox"]:checked').length;
-    const pct     = total ? Math.round((checked / total) * 100) : 0;
-    fillEl.style.width = pct + '%';
-    textEl.textContent = `${checked} / ${total}`;
-  }
+  function updateProgress() {}
 
   const sectionDefs = [
     { ctr: 'ctr-m400',  idx: 1 },
