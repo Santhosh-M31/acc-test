@@ -70,15 +70,17 @@
       font-weight: 700;
       letter-spacing: 0.5px;
       white-space: nowrap;
-      flex-shrink: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
     }
-    .ribbon-spacer { flex: 1; }
+    .ribbon-spacer { flex: 1; min-width: 8px; }
     .ribbon-submit-btn {
       background: #1a6b3a;
       color: white;
       border: none;
       border-radius: 6px;
-      padding: 0 20px;
+      padding: 0 16px;
       height: 36px;
       font-size: 0.82rem;
       font-weight: 700;
@@ -91,6 +93,11 @@
     }
     .ribbon-submit-btn:hover   { background: #145a30; }
     .ribbon-submit-btn:disabled { background: #475569; cursor: not-allowed; }
+    @media (max-width: 480px) {
+      .ribbon { padding: 0 12px; gap: 10px; }
+      .ribbon-company { display: none; }
+      .ribbon-submit-btn { font-size: 0.75rem; padding: 0 12px; }
+    }
 
     /* ── Page header ────────────────────────────────────────────────────────── */
     header {
