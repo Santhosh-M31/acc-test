@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pre-Flight Checklist</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+      color: white;
+      padding: 28px 24px 22px;
+      text-align: center;
+    }
+    header h1 { font-size: 1.7rem; letter-spacing: 1px; font-weight: 700; }
+    header p  { font-size: 0.9rem; opacity: 0.85; margin-top: 6px; }
+
+    .container { max-width: 860px; margin: 28px auto; padding: 0 16px 48px; }
+
+    /* Mission Info */
+    .mission-card {
+      background: white;
+      border-radius: 10px;
+      padding: 22px 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .mission-card h2 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #2b6cb0;
+      margin-bottom: 16px;
+      border-bottom: 2px solid #ebf4ff;
+      padding-bottom: 8px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 0.8rem; font-weight: 600; color: #4a5568; }
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 9px 12px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: #2b6cb0;
+      box-shadow: 0 0 0 3px rgba(43,108,176,0.12);
+    }
+
+    /* Section card */
+    .section-card {
+      background: white;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    .section-header {
+      background: #2b6cb0;
+      color: white;
+      padding: 13px 20px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-header .icon { font-size: 1.1rem; }
+    .section-counter {
+      margin-left: auto;
+      background: rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* Sub-section */
+    .subsection { border-bottom: 1px solid #e2e8f0; }
+    .subsection:last-child { border-bottom: none; }
+    .subsection-title {
+      background: #ebf4ff;
+      color: #1a365d;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 9px 20px;
+      border-left: 4px solid #2b6cb0;
+    }
+
+    /* Checklist item */
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 11px 20px;
+      border-bottom: 1px solid #f7fafc;
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+    .check-item:last-child { border-bottom: none; }
+    .check-item:hover { background: #f7fafc; }
+    .check-item input[type="checkbox"] {
+      width: 19px; height: 19px;
+      accent-color: #2b6cb0;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .check-item label {
+      font-size: 0.92rem;
+      cursor: pointer;
+      line-height: 1.4;
+      flex: 1;
+    }
+    .check-item input[type="checkbox"]:checked + label {
+      text-decoration: line-through;
+      color: #a0aec0;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      background: white;
+      border-radius: 10px;
+      padding: 18px 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+    .progress-wrap .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 8px;
+    }
+    .progress-bar-bg {
+      background: #e2e8f0;
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2b6cb0, #48bb78);
+      border-radius: 99px;
+      transition: width 0.3s;
+      width: 0%;
+    }
+
+    /* Remarks */
+    .remarks-card {
+      background: white;
+      border-radius: 10px;
+      padding: 22px 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+    .remarks-card h2 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #2b6cb0;
+      margin-bottom: 12px;
+    }
+    .remarks-card textarea {
+      width: 100%; padding: 10px 14px;
+      border: 1.5px solid #cbd5e0; border-radius: 6px;
+      font-size: 0.9rem; resize: vertical; min-height: 80px;
+    }
+    .remarks-card textarea:focus {
+      outline: none; border-color: #2b6cb0;
+      box-shadow: 0 0 0 3px rgba(43,108,176,0.12);
+    }
+
+    /* Submit */
+    .submit-btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #1a365d, #2b6cb0);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      box-shadow: 0 4px 14px rgba(43,108,176,0.35);
+    }
+    .submit-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+    .submit-btn:active { transform: translateY(0); }
+
+    /* Success message (hidden initially) */
+    #success-msg {
+      display: none;
+      background: #f0fff4;
+      border: 2px solid #48bb78;
+      border-radius: 10px;
+      padding: 24px;
+      text-align: center;
+      color: #276749;
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-top: 16px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.78rem;
+      color: #a0aec0;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>✈️ Pre-Flight Checklist</h1>
+  <p>Complete all sections before departure — DJI Matrice 400 &amp; Mavic 3 Multispectral</p>
+</header>
+
+<!-- ===================== FORM ===================== -->
+<!--
+  SETUP INSTRUCTIONS:
+  1. Go to https://formspree.io and sign up (free)
+  2. Create a new form — copy your Form ID (e.g. xpwzabcd)
+  3. Replace YOUR_FORMSPREE_ID below with your actual ID
+  4. Push index.html to a GitHub repo → enable GitHub Pages
+-->
+<form id="checklist-form" action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST">
+
+  <div class="container">
+
+    <!-- Progress -->
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Overall Progress</span>
+        <span id="progress-text">0 / 0 checked</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- Mission Info -->
+    <div class="mission-card">
+      <h2>Mission Information</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="pilot-name">Pilot Name *</label>
+          <input type="text" id="pilot-name" name="pilot_name" required placeholder="Enter pilot name" />
+        </div>
+        <div class="form-group">
+          <label for="team-member">Checked By *</label>
+          <input type="text" id="team-member" name="checked_by" required placeholder="Your name" />
+        </div>
+        <div class="form-group">
+          <label for="mission-date">Mission Date *</label>
+          <input type="date" id="mission-date" name="mission_date" required />
+        </div>
+        <div class="form-group">
+          <label for="location">Location / Block</label>
+          <input type="text" id="location" name="location" placeholder="e.g. Block 1, Mogadishu" />
+        </div>
+        <div class="form-group">
+          <label for="drone-type">Drone</label>
+          <select id="drone-type" name="drone_type">
+            <option value="">Select drone</option>
+            <option>DJI Matrice 400</option>
+            <option>DJI Mavic 3 Multispectral</option>
+            <option>Both</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="mission-type">Mission Type</label>
+          <input type="text" id="mission-type" name="mission_type" placeholder="e.g. LiDAR survey, RGB mapping" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== SECTION 1: DJI Matrice 400 ========== -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="icon">🚁</span>
+        DJI Matrice 400 — Drone Case
+        <span class="section-counter" id="ctr-m400">0/0</span>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Aircraft &amp; Accessories</div>
+        <label class="check-item"><input type="checkbox" name="m400_aircraft" value="checked" /><label>DJI Matrice 400 aircraft</label></label>
+        <label class="check-item"><input type="checkbox" name="m400_landing_gear" value="checked" /><label>Landing gear</label></label>
+        <label class="check-item"><input type="checkbox" name="m400_gimbal_mount" value="checked" /><label>Gimbal mount plate</label></label>
+        <label class="check-item"><input type="checkbox" name="m400_payload_bracket" value="checked" /><label>Payload mounting bracket</label></label>
+        <label class="check-item"><input type="checkbox" name="m400_gimbal_protector" value="checked" /><label>Gimbal protector / payload cover</label></label>
+        <label class="check-item"><input type="checkbox" name="m400_spare_props" value="checked" /><label>Spare propeller sets (2)</label></label>
+        <label class="check-item"><input type="checkbox" name="m400_prop_screws" value="checked" /><label>Propeller screws</label></label>
+        <label class="check-item"><input type="checkbox" name="m400_battery_cover" value="checked" /><label>Drone Battery Cover (for Pins)</label></label>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Remote Controller</div>
+        <label class="check-item"><input type="checkbox" name="m400_rc" value="checked" /><label>Remote controller</label></label>
+        <label class="check-item"><input type="checkbox" name="m400_rc_batt_checked" value="checked" /><label>Controller battery charge checked</label></label>
+        <label class="check-item"><input type="checkbox" name="m400_rc_spare_batt" value="checked" /><label>Spare controller battery</label></label>
+        <label class="check-item"><input type="checkbox" name="m400_rc_cable" value="checked" /><label>Controller charging cable</label></label>
+        <label class="check-item"><input type="checkbox" name="m400_screen_cloth" value="checked" /><label>Screen cleaning cloth</label></label>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Tools &amp; Storage</div>
+        <label class="check-item"><input type="checkbox" name="m400_screwdriver" value="checked" /><label>Screwdriver</label></label>
+        <label class="check-item"><input type="checkbox" name="m400_spare_screws" value="checked" /><label>Spare screws</label></label>
+        <label class="check-item"><input type="checkbox" name="m400_dampers" value="checked" /><label>Rubber Dampers</label></label>
+        <label class="check-item"><input type="checkbox" name="m400_ssd" value="checked" /><label>SSD 2TB</label></label>
+      </div>
+    </div>
+
+    <!-- ========== SECTION 2: Battery Station ========== -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="icon">🔋</span>
+        DJI Matrice 400 — Battery Station
+        <span class="section-counter" id="ctr-batt">0/0</span>
+      </div>
+      <label class="check-item"><input type="checkbox" name="batt_m400_batteries" value="checked" /><label>DJI M400 Batteries (4)</label></label>
+      <label class="check-item"><input type="checkbox" name="batt_power_cable" value="checked" /><label>Charging power cable</label></label>
+      <label class="check-item"><input type="checkbox" name="batt_charge_checked" value="checked" /><label>Battery charge levels checked</label></label>
+    </div>
+
+    <!-- ========== SECTION 3: Zenmuse L3 ========== -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="icon">📡</span>
+        DJI Zenmuse L3 LiDAR Payload
+        <span class="section-counter" id="ctr-l3">0/0</span>
+      </div>
+      <label class="check-item"><input type="checkbox" name="l3_sensor" value="checked" /><label>Zenmuse L3 LiDAR sensor</label></label>
+      <label class="check-item"><input type="checkbox" name="l3_cover" value="checked" /><label>Sensor protection cover</label></label>
+      <label class="check-item"><input type="checkbox" name="l3_storage_checked" value="checked" /><label>L3 storage checked</label></label>
+      <label class="check-item"><input type="checkbox" name="l3_sdcards" value="checked" /><label>SD cards (2) — min 300 GB space each</label></label>
+      <label class="check-item"><input type="checkbox" name="l3_cloth" value="checked" /><label>Microfiber cloth</label></label>
+    </div>
+
+    <!-- ========== SECTION 4: RTK / Survey ========== -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="icon">📍</span>
+        RTK / Survey Equipment
+        <span class="section-counter" id="ctr-rtk">0/0</span>
+      </div>
+      <label class="check-item"><input type="checkbox" name="rtk_base" value="checked" /><label>RTK base station</label></label>
+      <label class="check-item"><input type="checkbox" name="rtk_tripod" value="checked" /><label>Base station tripod</label></label>
+      <label class="check-item"><input type="checkbox" name="rtk_antennas" value="checked" /><label>GNSS antennas (4)</label></label>
+      <label class="check-item"><input type="checkbox" name="rtk_cable" value="checked" /><label>GNSS antenna cable</label></label>
+    </div>
+
+    <!-- ========== SECTION 5: Stationery ========== -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="icon">📓</span>
+        Stationery
+        <span class="section-counter" id="ctr-stat">0/0</span>
+      </div>
+      <label class="check-item"><input type="checkbox" name="stat_notebook" value="checked" /><label>Field notebook / diary</label></label>
+      <label class="check-item"><input type="checkbox" name="stat_pens" value="checked" /><label>Pens</label></label>
+      <label class="check-item"><input type="checkbox" name="stat_pencils" value="checked" /><label>Pencils</label></label>
+      <label class="check-item"><input type="checkbox" name="stat_marker" value="checked" /><label>Permanent marker</label></label>
+    </div>
+
+    <!-- ========== SECTION 6: Transport ========== -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="icon">🚗</span>
+        Transport &amp; Field Equipment
+        <span class="section-counter" id="ctr-trans">0/0</span>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Documents &amp; Safety</div>
+        <label class="check-item"><input type="checkbox" name="trans_drone_license" value="checked" /><label>Drone license</label></label>
+        <label class="check-item"><input type="checkbox" name="trans_ncvc_permit" value="checked" /><label>NCVC permit</label></label>
+        <label class="check-item"><input type="checkbox" name="trans_vehicle_inspection" value="checked" /><label>Vehicle inspection</label></label>
+        <label class="check-item"><input type="checkbox" name="trans_first_aid" value="checked" /><label>First aid kit</label></label>
+        <label class="check-item"><input type="checkbox" name="trans_fire_ext" value="checked" /><label>Fire extinguisher</label></label>
+        <label class="check-item"><input type="checkbox" name="trans_safety_shoes" value="checked" /><label>Safety shoes</label></label>
+        <label class="check-item"><input type="checkbox" name="trans_safety_lights" value="checked" /><label>Safety lights</label></label>
+        <label class="check-item"><input type="checkbox" name="trans_safety_jacket" value="checked" /><label>Safety jackets / hats</label></label>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Navigation &amp; Electronics</div>
+        <label class="check-item"><input type="checkbox" name="trans_gps" value="checked" /><label>GPS</label></label>
+        <label class="check-item"><input type="checkbox" name="trans_hypsometer" value="checked" /><label>Hypsometer (2)</label></label>
+        <label class="check-item"><input type="checkbox" name="trans_barometer" value="checked" /><label>Barometer (wind speed and flow)</label></label>
+        <label class="check-item"><input type="checkbox" name="trans_laptop" value="checked" /><label>Laptop</label></label>
+        <label class="check-item"><input type="checkbox" name="trans_power_banks" value="checked" /><label>Power banks (2)</label></label>
+        <label class="check-item"><input type="checkbox" name="trans_generator" value="checked" /><label>Generator</label></label>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Field Setup</div>
+        <label class="check-item"><input type="checkbox" name="trans_landing_pad" value="checked" /><label>Landing pad</label></label>
+        <label class="check-item"><input type="checkbox" name="trans_table" value="checked" /><label>Table</label></label>
+        <label class="check-item"><input type="checkbox" name="trans_chairs" value="checked" /><label>Chairs</label></label>
+        <label class="check-item"><input type="checkbox" name="trans_water" value="checked" /><label>Water</label></label>
+      </div>
+    </div>
+
+    <!-- ========== SECTION 7: Mavic 3 Multispectral ========== -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="icon">🌿</span>
+        DJI Mavic 3 Multispectral System
+        <span class="section-counter" id="ctr-m3m">0/0</span>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Aircraft</div>
+        <label class="check-item"><input type="checkbox" name="m3m_aircraft" value="checked" /><label>M3M aircraft</label></label>
+        <label class="check-item"><input type="checkbox" name="m3m_gimbal_protector" value="checked" /><label>Gimbal protector</label></label>
+        <label class="check-item"><input type="checkbox" name="m3m_spare_props" value="checked" /><label>Spare propellers</label></label>
+        <label class="check-item"><input type="checkbox" name="m3m_prop_tool" value="checked" /><label>Propeller tool</label></label>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Controller &amp; Storage</div>
+        <label class="check-item"><input type="checkbox" name="m3m_rc" value="checked" /><label>Remote controller</label></label>
+        <label class="check-item"><input type="checkbox" name="m3m_rc_batt_checked" value="checked" /><label>Controller battery charge checked</label></label>
+        <label class="check-item"><input type="checkbox" name="m3m_rc_cable" value="checked" /><label>Controller charging cable</label></label>
+        <label class="check-item"><input type="checkbox" name="m3m_microsd_installed" value="checked" /><label>MicroSD card installed</label></label>
+        <label class="check-item"><input type="checkbox" name="m3m_spare_microsd" value="checked" /><label>Spare microSD cards</label></label>
+        <label class="check-item"><input type="checkbox" name="m3m_sd_adapter" value="checked" /><label>SD card adapter</label></label>
+        <label class="check-item"><input type="checkbox" name="m3m_lens_cloth" value="checked" /><label>Lens cleaning cloth</label></label>
+        <label class="check-item"><input type="checkbox" name="m3m_microfiber" value="checked" /><label>Microfiber cloth</label></label>
+      </div>
+    </div>
+
+    <!-- Remarks -->
+    <div class="remarks-card">
+      <h2>Remarks / Notes</h2>
+      <textarea name="remarks" placeholder="Any missing items, issues, or notes for this mission..."></textarea>
+    </div>
+
+    <!-- Submit -->
+    <button type="submit" class="submit-btn">✅ Submit Pre-Flight Checklist</button>
+    <div id="success-msg">✅ Checklist submitted successfully! Safe flying. 🚁</div>
+
+  </div><!-- /container -->
+</form>
+
+<footer>Pre-Flight Checklist — DJI Matrice 400 &amp; Mavic 3 Multispectral</footer>
+
+<script>
+  // ── Progress tracking ──────────────────────────────────────────────────────
+  const allBoxes = document.querySelectorAll('input[type="checkbox"]');
+  const fillEl   = document.getElementById('progress-fill');
+  const textEl   = document.getElementById('progress-text');
+
+  function updateProgress() {
+    const total   = allBoxes.length;
+    const checked = document.querySelectorAll('input[type="checkbox"]:checked').length;
+    const pct     = total ? Math.round((checked / total) * 100) : 0;
+    fillEl.style.width = pct + '%';
+    textEl.textContent = `${checked} / ${total} checked (${pct}%)`;
+  }
+
+  // Per-section counters
+  const sectionMap = {
+    'ctr-m400':  '#checklist-form .section-card:nth-of-type(2)',
+    'ctr-batt':  '#checklist-form .section-card:nth-of-type(3)',
+    'ctr-l3':    '#checklist-form .section-card:nth-of-type(4)',
+    'ctr-rtk':   '#checklist-form .section-card:nth-of-type(5)',
+    'ctr-stat':  '#checklist-form .section-card:nth-of-type(6)',
+    'ctr-trans': '#checklist-form .section-card:nth-of-type(7)',
+    'ctr-m3m':   '#checklist-form .section-card:nth-of-type(8)',
+  };
+
+  function updateSectionCounters() {
+    Object.entries(sectionMap).forEach(([id, sel]) => {
+      const el = document.getElementById(id);
+      const card = document.querySelector(sel);
+      if (!el || !card) return;
+      const boxes   = card.querySelectorAll('input[type="checkbox"]');
+      const checked = card.querySelectorAll('input[type="checkbox"]:checked');
+      el.textContent = `${checked.length}/${boxes.length}`;
+      el.style.background = checked.length === boxes.length && boxes.length > 0
+        ? 'rgba(72,187,120,0.4)' : 'rgba(255,255,255,0.2)';
+    });
+  }
+
+  allBoxes.forEach(cb => cb.addEventListener('change', () => {
+    updateProgress();
+    updateSectionCounters();
+  }));
+
+  updateProgress();
+  updateSectionCounters();
+
+  // ── Set today's date as default ────────────────────────────────────────────
+  const dateInput = document.getElementById('mission-date');
+  if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+
+  // ── Formspree AJAX submit ──────────────────────────────────────────────────
+  const form = document.getElementById('checklist-form');
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = form.querySelector('.submit-btn');
+    btn.textContent = 'Submitting…';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        document.getElementById('success-msg').style.display = 'block';
+        btn.style.display = 'none';
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      } else {
+        btn.textContent = '❌ Submission failed — try again';
+        btn.disabled = false;
+      }
+    } catch {
+      btn.textContent = '❌ Network error — try again';
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
