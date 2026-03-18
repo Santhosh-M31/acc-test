@@ -12,16 +12,52 @@
       background: #f0f4f8;
       color: #1a202c;
       min-height: 100vh;
+      background-image: url('tec_solution_pro_logo.jpg');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-attachment: fixed;
+      background-size: 420px 420px;
+      background-blend-mode: luminosity;
+      position: relative;
     }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: rgba(240,244,248,0.92);
+      z-index: 0;
+      pointer-events: none;
+    }
+    form, footer { position: relative; z-index: 1; }
 
     header {
       background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
       color: white;
-      padding: 28px 24px 22px;
+      padding: 20px 24px 18px;
       text-align: center;
+      position: relative;
+      z-index: 1;
     }
-    header h1 { font-size: 1.7rem; letter-spacing: 1px; font-weight: 700; }
-    header p  { font-size: 0.9rem; opacity: 0.85; margin-top: 6px; }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .header-logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 10px;
+      object-fit: contain;
+      background: white;
+      padding: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+    }
+    .header-text { text-align: left; }
+    header h1 { font-size: 1.6rem; letter-spacing: 1px; font-weight: 700; line-height: 1.2; }
+    header p  { font-size: 0.88rem; opacity: 0.85; margin-top: 5px; }
 
     .container { max-width: 860px; margin: 28px auto; padding: 0 16px 48px; }
 
@@ -234,19 +270,17 @@
 <body>
 
 <header>
-  <h1>✈️ Pre-Flight Checklist</h1>
-  <p>Complete all sections before departure — DJI Matrice 400 &amp; Mavic 3 Multispectral</p>
+  <div class="header-inner">
+    <img src="tec_solution_pro_logo.jpg" alt="Tec Solution Pro Logo" class="header-logo" />
+    <div class="header-text">
+      <h1>✈️ Pre-Flight Checklist</h1>
+      <p>Complete all sections before departure — DJI Matrice 400 &amp; Mavic 3 Multispectral</p>
+    </div>
+  </div>
 </header>
 
 <!-- ===================== FORM ===================== -->
-<!--
-  SETUP INSTRUCTIONS:
-  1. Go to https://formspree.io and sign up (free)
-  2. Create a new form — copy your Form ID (e.g. xpwzabcd)
-  3. Replace YOUR_FORMSPREE_ID below with your actual ID
-  4. Push index.html to a GitHub repo → enable GitHub Pages
--->
-<form id="checklist-form" action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST">
+<form id="checklist-form" action="https://formsubmit.co/ajax/msanthosh@tecsolutiongroup.com" method="POST">
 
   <div class="container">
 
@@ -278,8 +312,12 @@
           <input type="date" id="mission-date" name="mission_date" required />
         </div>
         <div class="form-group">
-          <label for="location">Location / Block</label>
-          <input type="text" id="location" name="location" placeholder="e.g. Block 1, Mogadishu" />
+          <label for="mission-start-time">Mission Start Time *</label>
+          <input type="time" id="mission-start-time" name="mission_start_time" required />
+        </div>
+        <div class="form-group">
+          <label for="location">Site No.</label>
+          <input type="text" id="location" name="site_no" placeholder="e.g. Site 01" />
         </div>
         <div class="form-group">
           <label for="drone-type">Drone</label>
@@ -520,7 +558,7 @@
   const dateInput = document.getElementById('mission-date');
   if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
 
-  // ── Formspree AJAX submit ──────────────────────────────────────────────────
+  // ── Formsubmit.co AJAX submit ─────────────────────────────────────────────
   const form = document.getElementById('checklist-form');
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -528,13 +566,30 @@
     btn.textContent = 'Submitting…';
     btn.disabled = true;
 
+    // Build JSON payload from form data
+    const data = {};
+    new FormData(form).forEach((val, key) => {
+      if (data[key]) {
+        data[key] = data[key] + ', ' + val;
+      } else {
+        data[key] = val;
+      }
+    });
+    data['_subject'] = 'Pre-Flight Checklist — ' + (data['site_no'] || '') + ' | ' + (data['mission_date'] || '');
+    data['_template'] = 'table';
+    data['_captcha'] = 'false';
+
     try {
       const res = await fetch(form.action, {
         method: 'POST',
-        body: new FormData(form),
-        headers: { 'Accept': 'application/json' }
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
       });
-      if (res.ok) {
+      const json = await res.json();
+      if (json.success === 'true' || json.success === true || res.ok) {
         document.getElementById('success-msg').style.display = 'block';
         btn.style.display = 'none';
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
