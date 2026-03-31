@@ -1,21 +1,31 @@
-# Pre-Flight Checklist — Tec Solution Pro
+# Drone Operations Checklists — Tec Solution Pro
 
-A web-based pre-flight checklist for drone survey operations, built for field teams using the **DJI Matrice 400** and **DJI Mavic 3 Multispectral** systems. Hosted on GitHub Pages — no app install required, works on any device with a browser.
+Web-based pre-flight and post-flight checklists for drone survey operations, built for field teams using the **DJI Matrice 400** and **DJI Mavic 3 Multispectral** systems. Hosted on GitHub Pages — no app install required, works on any device with a browser.
 
 **Live:** [https://santhosh-m31.github.io/acc-test/](https://santhosh-m31.github.io/acc-test/)
 
 ---
 
-## What It Does
+## Pages
 
-- **Digital pre-flight verification** — guides the field team through every equipment check before leaving for a mission
-- **Sticky section headers** — as you scroll through a section, its header stays visible at the top showing how many items have been checked (e.g. `5 / 8`)
-- **Form submission** — on submit, a full record of the checklist is emailed to the operations team automatically
-- **Works on mobile & desktop** — responsive layout, accessible on phones in the field
+| Page | URL | Purpose |
+|---|---|---|
+| Landing | `/` | Links to both checklists |
+| Pre-Flight | `/pre-flight.html` | Complete before departure |
+| Post-Flight | `/post-flight.html` | Complete after mission |
 
 ---
 
-## Checklist Sections
+## Features
+
+- **Sticky section headers** — stay visible while scrolling, showing live progress (e.g. `5 / 8`)
+- **Form submission** — on submit, a full checklist record is emailed to the operations team
+- **Mobile & desktop** — responsive layout, usable on phones in the field
+- **Auto-populated date** — mission date defaults to today
+
+---
+
+## Pre-Flight Checklist Sections
 
 | Section | Items Covered |
 |---|---|
@@ -27,22 +37,24 @@ A web-based pre-flight checklist for drone survey operations, built for field te
 | Transport & Field Equipment | Documents, safety gear, navigation devices, field setup, benzene generator |
 | DJI Mavic 3 Multispectral System | Aircraft, controller, microSD cards, lens care |
 
+## Post-Flight Checklist Sections
+
+| Section | Items Covered |
+|---|---|
+| Drone (M400) | Power off, battery removed, propellers secured, covers installed, packed |
+| Batteries & Station | All batteries collected, charger & power cables packed |
+| LiDAR (L3) | Sensor, cables, SD card / data unit collected |
+| RTK & Tripod | Base unit, antenna, tripod, cables packed |
+| Controller & Devices | Remote controller & cables packed |
+| Data | SD cards collected, data copied, quick file check |
+| Miscellaneous | Landing pad, table & chairs, generator, hypsometer, GPS, laptop, power banks |
+| Final Check | Nothing left on ground, all items back in cases |
+
 ---
 
 ## Mission Information Captured
 
-Each submission records:
-
-- Pilot name
-- Checked by (team member)
-- Mission date & start time
-- Province (Saudi Arabia — all 13 regions)
-- Site / Grid reference
-- Drone type
-- Mission type
-- Battery quantity
-- All checked / unchecked items
-- Remarks / notes
+Each submission records: pilot name, checked-by, mission date & time, province, site/grid reference, drone type, mission type, all checklist items, and remarks.
 
 ---
 
@@ -52,10 +64,26 @@ Responses are emailed via [Formsubmit.co](https://formsubmit.co) (no backend req
 
 - **Primary:** asim.tanweer@tecsolutiongroup.com
 - **CC:** msanthosh@tecsolutiongroup.com
+- **Subject:** `Pre-Flight Checklist — Site_01/Grid_01 | 2026-03-31`
 
-Each email is formatted as a table with all mission details and checklist results.
+> **First-time activation:** On the very first submission, Formsubmit will send a confirmation email to the primary address. Click "Confirm" to activate.
 
-> **First-time activation:** On the very first form submission, Formsubmit will send a confirmation email to the primary address. Click "Confirm" to activate — all future submissions will deliver automatically.
+---
+
+## Project Structure
+
+```
+acc-test/
+├── index.html           # Landing page
+├── pre-flight.html      # Pre-flight checklist
+├── post-flight.html     # Post-flight checklist
+├── css/
+│   ├── checklist.css    # Shared styles (used by both checklists)
+│   └── landing.css      # Landing page styles
+├── js/
+│   └── checklist.js     # Shared form logic (counters, submission)
+└── tec_solution_pro_logo.jpg
+```
 
 ---
 

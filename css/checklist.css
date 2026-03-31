@@ -1,0 +1,333 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Tec Solution Pro — Shared Checklist Styles
+   Used by: pre-flight.html, post-flight.html
+───────────────────────────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:     #1b3a52;
+  --blue:     #25567a;
+  --mid:      #2e7da6;
+  --light:    #eef6fb;
+  --border:   #c8dce8;
+  --text:     #1a202c;
+  --muted:    #5a7385;
+  --green:    #1e7e4a;
+  --green-bg: #edfaf3;
+  --white:    #ffffff;
+  --bg:       #f2f6f9;
+  --ribbon-h: 58px;
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────────── */
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background-color: var(--bg);
+  background-image: url('../tec_solution_pro_logo.jpg');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: fixed;
+  background-size: 380px 380px;
+  color: var(--text);
+  min-height: 100vh;
+  padding-top: var(--ribbon-h);
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(241,244,249,0.93);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Sticky action ribbon ───────────────────────────────────────────────────── */
+.ribbon {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--ribbon-h);
+  background: var(--navy);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+}
+.ribbon-logo {
+  width: 36px; height: 36px;
+  border-radius: 6px;
+  object-fit: contain;
+  background: white;
+  padding: 3px;
+  flex-shrink: 0;
+}
+.ribbon-company {
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.ribbon-spacer { flex: 1; min-width: 8px; }
+.ribbon-submit-btn {
+  background: #1a6b3a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0 16px;
+  height: 36px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+.ribbon-submit-btn:hover    { background: #145a30; }
+.ribbon-submit-btn:disabled { background: #475569; cursor: not-allowed; }
+
+/* ── Page header ────────────────────────────────────────────────────────────── */
+header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+  color: white;
+  padding: 28px 24px 24px;
+  position: relative;
+  z-index: 1;
+}
+.header-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.header-logo {
+  width: 72px; height: 72px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: white;
+  padding: 5px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  flex-shrink: 0;
+}
+.header-company {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  opacity: 0.7;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.header-title {
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+.header-sub {
+  font-size: 0.83rem;
+  opacity: 0.7;
+  margin-top: 5px;
+}
+
+/* ── Layout ─────────────────────────────────────────────────────────────────── */
+.container {
+  max-width: 860px;
+  margin: 24px auto;
+  padding: 0 16px 56px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Cards ──────────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--white);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px var(--border);
+  overflow: visible;
+}
+.card > :first-child { border-radius: 8px 8px 0 0; overflow: hidden; }
+.card > :last-child  { border-radius: 0 0 8px 8px; overflow: hidden; }
+.card > :only-child  { border-radius: 8px; }
+.card-title {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--blue);
+  font-weight: 700;
+  padding: 16px 20px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.card-body { padding: 16px 20px; }
+
+/* ── Mission info grid ──────────────────────────────────────────────────────── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 9px 11px;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  font-size: 0.88rem;
+  color: var(--text);
+  background: white;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--mid);
+  box-shadow: 0 0 0 3px rgba(37,99,168,0.1);
+}
+
+/* ── Section header ─────────────────────────────────────────────────────────── */
+.section-header {
+  background: var(--blue);
+  color: white;
+  padding: 11px 20px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: sticky;
+  top: var(--ribbon-h);
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.section-counter {
+  margin-left: auto;
+  background: rgba(255,255,255,0.18);
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.section-counter.complete { background: rgba(34,197,94,0.35); }
+
+/* ── Sub-section ────────────────────────────────────────────────────────────── */
+.subsection { border-bottom: 1px solid var(--border); }
+.subsection:last-child { border-bottom: none; }
+.subsection-title {
+  background: #f0f5fc;
+  color: var(--navy);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 8px 20px;
+  border-left: 3px solid var(--mid);
+}
+
+/* ── Checklist item ─────────────────────────────────────────────────────────── */
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #f5f7fa;
+  cursor: pointer;
+  transition: background 0.1s;
+  user-select: none;
+}
+.check-item:last-child { border-bottom: none; }
+.check-item:hover { background: #f8fafd; }
+.check-item input[type="checkbox"] {
+  width: 16px; height: 16px;
+  accent-color: var(--blue);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.check-item span {
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+.check-item input[type="checkbox"]:checked ~ span {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+
+/* ── Qty input (inside check-item) ─────────────────────────────────────────── */
+.qty-input {
+  width: 70px;
+  margin-left: 10px;
+  padding: 4px 8px;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* ── Remarks ────────────────────────────────────────────────────────────────── */
+.remarks-card textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  font-size: 0.88rem;
+  resize: vertical;
+  min-height: 80px;
+}
+.remarks-card textarea:focus {
+  outline: none;
+  border-color: var(--mid);
+  box-shadow: 0 0 0 3px rgba(37,99,168,0.1);
+}
+
+/* ── Success banner ─────────────────────────────────────────────────────────── */
+#success-msg {
+  display: none;
+  background: var(--green-bg);
+  border: 1.5px solid #86efac;
+  border-radius: 8px;
+  padding: 20px 24px;
+  text-align: center;
+  color: var(--green);
+  font-weight: 600;
+  font-size: 1rem;
+  margin-top: 12px;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────────── */
+footer {
+  text-align: center;
+  font-size: 0.74rem;
+  color: #94a3b8;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 560px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .ribbon { padding: 0 12px; gap: 10px; }
+  .ribbon-submit-btn { font-size: 0.75rem; padding: 0 12px; }
+}
