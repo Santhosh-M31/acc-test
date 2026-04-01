@@ -79,6 +79,11 @@
           body:    JSON.stringify(data),
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
         });
+        if (!res.ok) {
+          btn.textContent = `Server Error ${res.status} — Retry`;
+          btn.disabled = false;
+          return;
+        }
         let json = null;
         try { json = await res.json(); } catch (_) { /* non-JSON response */ }
         if (json && (json.success === 'true' || json.success === true)) {
@@ -89,8 +94,9 @@
           btn.textContent = 'Submission Failed — Retry';
           btn.disabled = false;
         }
-      } catch {
-        btn.textContent = 'Network Error — Retry';
+      } catch (err) {
+        const msg = err instanceof TypeError ? 'Network Error' : `Unexpected Error: ${err.message}`;
+        btn.textContent = `${msg} — Retry`;
         btn.disabled = false;
       }
     });
