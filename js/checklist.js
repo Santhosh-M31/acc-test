@@ -79,8 +79,9 @@
           body:    JSON.stringify(data),
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
         });
-        const json = await res.json();
-        if (json.success === 'true' || json.success === true || res.ok) {
+        let json = null;
+        try { json = await res.json(); } catch (_) { /* non-JSON response */ }
+        if (json && (json.success === 'true' || json.success === true)) {
           document.getElementById('success-msg').style.display = 'block';
           btn.textContent = 'Submitted';
           window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
