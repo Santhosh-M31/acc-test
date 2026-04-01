@@ -51,7 +51,7 @@
     });
   }
 
-  /* ── Form submission via Formsubmit.co ──────────────────────────────────── */
+  /* ── Form submission via Google Apps Script ─────────────────────────────── */
   if (form) {
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -65,19 +65,18 @@
         data[key] = data[key] ? data[key] + ', ' + val : val;
       });
 
-      // Formsubmit.co special fields
-      data['_subject']  = (cfg.subjectPrefix || 'Checklist') +
-                          ' — ' + (data['site_grid'] || '') +
-                          ' | ' + (data['mission_date'] || '');
-      data['_cc']       = 'msanthosh@tecsolutiongroup.com';
-      data['_template'] = 'table';
-      data['_captcha']  = 'false';
+      // Apps Script metadata fields
+      data['_form']    = cfg.formName || 'Checklist';
+      data['_subject'] = (cfg.subjectPrefix || 'Checklist') +
+                         ' — ' + (data['site_grid'] || '') +
+                         ' | ' + (data['mission_date'] || '');
 
       try {
-        const res  = await fetch(form.action, {
+        // text/plain avoids a CORS preflight on the Apps Script endpoint
+        const res = await fetch(cfg.submitUrl, {
           method:  'POST',
           body:    JSON.stringify(data),
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+          headers: { 'Content-Type': 'text/plain' }
         });
         if (!res.ok) {
           btn.textContent = `Server Error ${res.status} — Retry`;
@@ -86,7 +85,7 @@
         }
         let json = null;
         try { json = await res.json(); } catch (_) { /* non-JSON response */ }
-        if (json && (json.success === 'true' || json.success === true)) {
+        if (json && json.success === true) {
           document.getElementById('success-msg').style.display = 'block';
           btn.textContent = 'Submitted';
           window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
