@@ -59,10 +59,19 @@
       btn.textContent = 'Submitting...';
       btn.disabled = true;
 
-      // Collect all form values; concatenate multiples with ", "
+      // Collect text/date/select/textarea fields
       const data = {};
-      new FormData(form).forEach((val, key) => {
-        data[key] = data[key] ? data[key] + ', ' + val : val;
+      form.querySelectorAll('input:not([type="checkbox"]), select, textarea').forEach(el => {
+        if (!el.name) return;
+        const v = el.value.trim();
+        if (v) data[el.name] = data[el.name] ? data[el.name] + ', ' + v : v;
+      });
+
+      // Each checkbox → column header = label text, value = Yes / No
+      form.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        const span = cb.closest('label') && cb.closest('label').querySelector('span');
+        const header = span ? span.textContent.trim() : cb.name;
+        data[header] = cb.checked ? 'Yes' : 'No';
       });
 
       // Apps Script metadata fields
