@@ -305,12 +305,39 @@ header {
   background: var(--green-bg);
   border: 1.5px solid #86efac;
   border-radius: 8px;
-  padding: 20px 24px;
+  padding: 20px 28px;
   text-align: center;
   color: var(--green);
-  font-weight: 600;
-  font-size: 1rem;
   margin-top: 12px;
+}
+.success-title {
+  font-weight: 700;
+  font-size: 1.08rem;
+  margin-bottom: 12px;
+  letter-spacing: 0.2px;
+}
+.success-reminder {
+  font-size: 0.93rem;
+  font-weight: 500;
+  color: #166534;
+  line-height: 1.5;
+}
+.success-reminder-label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.6px;
+  color: #15803d;
+}
+.success-priority-list {
+  display: inline-block;
+  text-align: left;
+  margin: 0;
+  padding-left: 20px;
+}
+.success-priority-list li {
+  margin-bottom: 3px;
 }
 
 /* ── Footer ─────────────────────────────────────────────────────────────────── */
