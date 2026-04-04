@@ -336,22 +336,11 @@ header {
   margin: 0;
   padding-left: 20px;
 }
-.success-priority-list li {
-  margin-bottom: 3px;
-}
-.priority-top {
-  font-weight: 700;
-  font-size: 1rem;
-  color: #b91c1c;
-  background: #fee2e2;
-  border: 1.5px solid #fca5a5;
-  border-radius: 5px;
-  padding: 3px 10px;
-  list-style: none;
-  margin-left: -20px;
-  margin-bottom: 6px;
-  letter-spacing: 0.2px;
-}
+.success-priority-list li { margin-bottom: 3px; }
+.priority-1 { font-size: 1.1rem; font-weight: 700; }
+.priority-2 { font-size: 0.97rem; font-weight: 600; }
+.priority-3 { font-size: 0.88rem; font-weight: 500; }
+.priority-4 { font-size: 0.80rem; font-weight: 400; }
 
 /* ── Footer ─────────────────────────────────────────────────────────────────── */
 footer {
