@@ -325,7 +325,7 @@ header {
 .success-reminder-label {
   font-weight: 600;
   margin-bottom: 6px;
-  text-transform: uppercase;
+  text-transform: capitalize;
   font-size: 0.75rem;
   letter-spacing: 0.6px;
   color: #15803d;
