@@ -26,33 +26,55 @@
     .remove-grid-btn:hover { background: #fecaca; }
 
     /* ── Three-part name ───────────────────────────────────────────────────── */
-    .grid-name-section { padding: 12px 20px 14px; border-bottom: 1px solid #eef0f3; }
-    .grid-name-labels { display: flex; align-items: center; margin-bottom: 5px; }
-    .grid-name-labels .lbl { font-size: 0.67rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.6px; }
-    .lbl-loc { width: 72px; text-align: center; }
-    .lbl-sep { width: 28px; }
-    .lbl-part { flex: 1; }
-    .grid-name-row { display: flex; align-items: center; }
-    .grid-sep { width: 28px; text-align: center; color: #94a3b8; font-weight: 700; font-size: 1rem; flex-shrink: 0; }
+    .grid-name-section { padding: 12px 16px 14px; border-bottom: 1px solid #eef0f3; }
+
+    /* Column wrapper — label sits above its input */
+    .gnc { display: flex; flex-direction: column; gap: 4px; }
+    .gnc .lbl {
+      font-size: 0.67rem; font-weight: 700; color: #94a3b8;
+      text-transform: uppercase; letter-spacing: 0.6px;
+    }
+
+    /* Row 1: Region — Site (side by side) */
+    .grid-name-row1 {
+      display: flex; align-items: flex-end; gap: 0; margin-bottom: 10px;
+    }
+    .gnc-region { flex-shrink: 0; }
+    .gnc-site   { flex: 1; }
+
+    /* Row 2: Grid (full width) */
+    .grid-name-row2 { display: flex; }
+    .gnc-grid { flex: 1; }
+
+    /* Inline separator between Region and Site */
+    .grid-sep-inline {
+      flex-shrink: 0; align-self: flex-end;
+      padding: 0 8px 10px;
+      color: #94a3b8; font-weight: 700; font-size: 1rem;
+    }
+
+    /* Inputs — 1rem prevents iOS auto-zoom on focus */
     .grid-loc {
-      width: 72px; text-align: center; padding: 8px 6px;
-      border: 1.5px solid #c8dce8; border-radius: 5px;
-      font-size: 0.88rem; font-weight: 700; color: #1a202c;
-      font-family: inherit; text-transform: uppercase; flex-shrink: 0;
+      width: 72px; text-align: center; padding: 10px 6px;
+      border: 1.5px solid #c8dce8; border-radius: 6px;
+      font-size: 1rem; font-weight: 700; color: #1a202c;
+      font-family: inherit; text-transform: uppercase;
+      box-sizing: border-box; -webkit-appearance: none;
     }
     .grid-site, .grid-grid {
-      flex: 1; padding: 8px 10px; border: 1.5px solid #c8dce8;
-      border-radius: 5px; font-size: 0.88rem; font-weight: 600;
-      color: #1a202c; font-family: inherit;
+      width: 100%; padding: 10px 12px;
+      border: 1.5px solid #c8dce8; border-radius: 6px;
+      font-size: 1rem; font-weight: 600; color: #1a202c;
+      font-family: inherit; box-sizing: border-box; -webkit-appearance: none;
     }
     .grid-loc:focus, .grid-site:focus, .grid-grid:focus {
-      outline: none; border-color: #2e7da6; box-shadow: 0 0 0 3px rgba(46,125,166,0.12);
+      outline: none; border-color: #2e7da6; box-shadow: 0 0 0 3px rgba(46,125,166,0.15);
     }
     .grid-loc.input-error, .grid-site.input-error, .grid-grid.input-error {
       border-color: #b91c1c !important; box-shadow: 0 0 0 3px rgba(185,28,28,0.12) !important;
     }
     .grid-name-hint {
-      font-size: 0.68rem; color: #94a3b8; margin-top: 5px; letter-spacing: 0.2px;
+      font-size: 0.68rem; color: #94a3b8; margin-top: 6px; letter-spacing: 0.2px;
     }
 
     /* ── Completion % ──────────────────────────────────────────────────────── */
@@ -137,15 +159,24 @@
     }
     .grid-notes:focus { outline: none; border-color: #2e7da6; box-shadow: 0 0 0 3px rgba(46,125,166,0.12); }
 
-    /* ── Survey complete (inline) ──────────────────────────────────────────── */
-    .survey-inline-btn {
-      padding: 4px 11px; border: 1.5px solid #1e7e4a; border-radius: 20px;
-      background: white; color: #1e7e4a; font-size: 0.75rem; font-weight: 700;
-      cursor: pointer; white-space: nowrap; transition: all 0.15s; font-family: inherit;
-      flex-shrink: 0;
+    /* ── Status buttons (In Progress / Grid Completed) ───────────────────── */
+    .status-row {
+      display: flex; align-items: center; flex-wrap: wrap;
+      gap: 8px; padding: 10px 20px; border-bottom: 1px solid #eef0f3;
     }
-    .survey-inline-btn:hover { background: #f0fdf4; }
-    .survey-inline-btn.done  { background: #1e7e4a; color: white; }
+    .status-btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+    .status-btn {
+      padding: 5px 14px; border: 1.5px solid; border-radius: 20px;
+      font-size: 0.78rem; font-weight: 700; cursor: pointer;
+      white-space: nowrap; transition: all 0.15s; font-family: inherit;
+      -webkit-appearance: none;
+    }
+    .status-btn.status-inprogress        { border-color: #b45309; color: #b45309; background: white; }
+    .status-btn.status-inprogress:hover  { background: #fffbeb; }
+    .status-btn.status-inprogress.active { background: #b45309; color: white; }
+    .status-btn.status-complete          { border-color: #1e7e4a; color: #1e7e4a; background: white; }
+    .status-btn.status-complete:hover    { background: #f0fdf4; }
+    .status-btn.status-complete.active   { background: #1e7e4a; color: white; }
 
     /* ── Add grid button ───────────────────────────────────────────────────── */
     .add-grid-btn {
@@ -164,8 +195,17 @@
     .grid-badge.has-entries { background: rgba(34,197,94,0.35); }
 
     @media (max-width: 560px) {
-      .pct-btn { font-size: 0.7rem; padding: 3px 8px; }
-      .lbl-loc, .grid-loc { width: 58px; }
+      .grid-name-section { padding: 12px 14px 14px; }
+      .pct-row           { padding: 10px 14px; }
+      .grid-remarks-section, .grid-notes-section { padding-left: 0; padding-right: 0; }
+      .grid-section-label, .remarks-group-header { padding-left: 14px; padding-right: 14px; }
+      .remark-item        { padding: 7px 14px; }
+      .grid-remarks-ta    { width: calc(100% - 28px); margin: 10px 14px 0; }
+      .grid-notes-section { padding: 10px 14px 14px; }
+      .pct-btn            { font-size: 0.7rem; padding: 4px 9px; }
+      .grid-loc           { width: 64px; }
+      /* Single-column remarks on narrow screens */
+      .remarks-cols       { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -300,30 +340,41 @@
       </div>
 
       <div class="grid-name-section">
-        <div class="grid-name-labels">
-          <span class="lbl lbl-loc">Region *</span>
-          <span class="lbl lbl-sep"></span>
-          <span class="lbl lbl-part">Site # *</span>
-          <span class="lbl lbl-sep"></span>
-          <span class="lbl lbl-part">Grid # *</span>
+        <!-- Row 1: Region + Site -->
+        <div class="grid-name-row1">
+          <div class="gnc gnc-region">
+            <span class="lbl">Region *</span>
+            <input type="text" class="grid-loc" placeholder="RUH" maxlength="3"
+              oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,3);this.classList.remove('input-error')" />
+          </div>
+          <span class="grid-sep-inline">—</span>
+          <div class="gnc gnc-site">
+            <span class="lbl">Site # *</span>
+            <input type="text" class="grid-site" placeholder="01" inputmode="numeric"
+              oninput="this.value=this.value.replace(/[^0-9]/g,'');this.classList.remove('input-error')" />
+          </div>
         </div>
-        <div class="grid-name-row">
-          <input type="text" class="grid-loc" placeholder="e.g. RUH" maxlength="3"
-            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,3);this.classList.remove('input-error')" />
-          <span class="grid-sep">—</span>
-          <input type="text" class="grid-site" placeholder="01" inputmode="numeric"
-            oninput="this.value=this.value.replace(/[^0-9]/g,'');this.classList.remove('input-error')" />
-          <span class="grid-sep">—</span>
-          <input type="text" class="grid-grid" placeholder="01" inputmode="numeric"
-            oninput="this.value=this.value.replace(/[^0-9]/g,'');this.classList.remove('input-error')" />
+        <!-- Row 2: Grid (full width) -->
+        <div class="grid-name-row2">
+          <div class="gnc gnc-grid">
+            <span class="lbl">Grid # *</span>
+            <input type="text" class="grid-grid" placeholder="01" inputmode="numeric"
+              oninput="this.value=this.value.replace(/[^0-9]/g,'');this.classList.remove('input-error')" />
+          </div>
         </div>
-        <div class="grid-name-hint">Type the number only — e.g. RUH · 02 · 01 &rarr; RUH-Site02-Grid01</div>
+        <div class="grid-name-hint">e.g. RUH &middot; 02 &middot; 01 &rarr; RUH-Site02-Grid01</div>
       </div>
 
       <div class="pct-row">
         <span class="pct-label">Complete</span>
         <div class="pct-buttons">${pctBtnsHTML}</div>
-        <button type="button" class="survey-inline-btn" onclick="toggleSurveyComplete(this)">No Further Flights</button>
+      </div>
+      <div class="status-row">
+        <span class="pct-label">Status</span>
+        <div class="status-btn-group">
+          <button type="button" class="status-btn status-inprogress active" data-status="In Progress" onclick="selectStatus(this)">In Progress</button>
+          <button type="button" class="status-btn status-complete" data-status="Grid Completed" onclick="selectStatus(this)">Grid Completed</button>
+        </div>
       </div>
 
       <div class="grid-remarks-section">
@@ -391,10 +442,12 @@
     }
   }
 
-  function toggleSurveyComplete(btn) {
-    const done   = btn.classList.toggle('done');
+  function selectStatus(btn) {
+    const group = btn.closest('.status-btn-group');
+    group.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const done   = btn.dataset.status === 'Grid Completed';
     const header = btn.closest('.grid-entry').querySelector('.grid-entry-header');
-    btn.textContent = done ? '✓ No Further Flights' : 'No Further Flights';
     header.classList.toggle('complete-header', done);
   }
 
@@ -440,8 +493,7 @@
       const pct     = entry.querySelector('.pct-btn.active')?.dataset.pct;
       const remarks = entry.querySelector('.grid-remarks-ta').value.trim();
       const notes   = entry.querySelector('.grid-notes').value.trim();
-      const status  = entry.querySelector('.survey-inline-btn').classList.contains('done')
-        ? 'Survey Complete' : 'In Progress';
+      const status  = entry.querySelector('.status-btn.active')?.dataset.status || 'In Progress';
 
       const data = {
         pilot_name:   pilotName,
