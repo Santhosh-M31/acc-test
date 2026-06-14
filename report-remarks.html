@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Report &amp; Remarks — Tec Solution Pro</title>
+  <link rel="stylesheet" href="css/checklist.css" />
+  <style>
+    /* ── Grid entry ────────────────────────────────────────────────────────── */
+    .grid-entry { border-bottom: 2px solid #dce8f0; }
+    .grid-entry:last-of-type { border-bottom: none; }
+
+    .grid-entry-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 20px; background: #f0f5fc;
+      border-bottom: 1px solid #dce8f0;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .grid-entry-header.complete-header { background: #edfaf3; border-bottom-color: #86efac; }
+    .grid-num { font-size: 0.82rem; font-weight: 700; color: #25567a; flex: 1; }
+    .remove-grid-btn {
+      background: #fee2e2; color: #b91c1c; border: none;
+      border-radius: 5px; width: 26px; height: 26px;
+      font-size: 0.78rem; cursor: pointer; flex-shrink: 0; transition: background 0.15s;
+    }
+    .remove-grid-btn:hover { background: #fecaca; }
+
+    /* ── Three-part name ───────────────────────────────────────────────────── */
+    .grid-name-section { padding: 12px 20px 14px; border-bottom: 1px solid #eef0f3; }
+    .grid-name-labels { display: flex; align-items: center; margin-bottom: 5px; }
+    .grid-name-labels .lbl { font-size: 0.67rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.6px; }
+    .lbl-loc { width: 72px; text-align: center; }
+    .lbl-sep { width: 28px; }
+    .lbl-part { flex: 1; }
+    .grid-name-row { display: flex; align-items: center; }
+    .grid-sep { width: 28px; text-align: center; color: #94a3b8; font-weight: 700; font-size: 1rem; flex-shrink: 0; }
+    .grid-loc {
+      width: 72px; text-align: center; padding: 8px 6px;
+      border: 1.5px solid #c8dce8; border-radius: 5px;
+      font-size: 0.88rem; font-weight: 700; color: #1a202c;
+      font-family: inherit; text-transform: uppercase; flex-shrink: 0;
+    }
+    .grid-site, .grid-grid {
+      flex: 1; padding: 8px 10px; border: 1.5px solid #c8dce8;
+      border-radius: 5px; font-size: 0.88rem; font-weight: 600;
+      color: #1a202c; font-family: inherit;
+    }
+    .grid-loc:focus, .grid-site:focus, .grid-grid:focus {
+      outline: none; border-color: #2e7da6; box-shadow: 0 0 0 3px rgba(46,125,166,0.12);
+    }
+
+    /* ── Completion % ──────────────────────────────────────────────────────── */
+    .pct-row {
+      display: flex; align-items: center; flex-wrap: wrap;
+      gap: 8px; padding: 11px 20px; border-bottom: 1px solid #eef0f3;
+    }
+    .pct-label { font-size: 0.68rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.6px; white-space: nowrap; }
+    .pct-buttons { display: flex; flex-wrap: wrap; gap: 5px; }
+    .pct-btn {
+      padding: 4px 10px; border: 1.5px solid #c8dce8; border-radius: 20px;
+      background: white; color: #5a7385; font-size: 0.75rem; font-weight: 700;
+      cursor: pointer; transition: all 0.12s; font-family: inherit;
+    }
+    .pct-btn:hover { border-color: #2e7da6; color: #2e7da6; }
+    .pct-btn.active                    { color: white; border-color: transparent; }
+    .pct-btn.active[data-pct="100"]    { background: #1e7e4a; }
+    .pct-btn.active[data-pct="90"],
+    .pct-btn.active[data-pct="80"],
+    .pct-btn.active[data-pct="70"]     { background: #25567a; }
+    .pct-btn.active[data-pct="60"],
+    .pct-btn.active[data-pct="50"]     { background: #b45309; }
+    .pct-btn.active[data-pct="40"],
+    .pct-btn.active[data-pct="30"],
+    .pct-btn.active[data-pct="20"],
+    .pct-btn.active[data-pct="10"]     { background: #b91c1c; }
+
+    /* ── Remarks section ──────────────────────────────────────────────────── */
+    .grid-remarks-section { border-bottom: 1px solid #eef0f3; padding-bottom: 14px; }
+    .grid-section-label {
+      font-size: 0.67rem; font-weight: 700; color: #94a3b8;
+      text-transform: uppercase; letter-spacing: 0.8px; padding: 10px 20px 4px;
+    }
+    .remarks-group-header {
+      font-size: 0.67rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; padding: 8px 20px 2px;
+    }
+    .remarks-group-header.pos   { color: #1e7e4a; }
+    .remarks-group-header.issue { color: #b91c1c; }
+
+    .remarks-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .remark-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 6px 20px; cursor: pointer;
+      border: none; background: none; text-align: left;
+      font-family: inherit; transition: background 0.1s; width: 100%;
+    }
+    .remark-item:hover { background: #f8fafd; }
+    .ri-box {
+      width: 15px; height: 15px; flex-shrink: 0;
+      border: 1.5px solid #c8dce8; border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: 900; color: white;
+      transition: all 0.12s;
+    }
+    .ri-label { font-size: 0.8rem; color: #1a202c; line-height: 1.35; transition: color 0.12s; }
+
+    .remark-item.pos.active   .ri-box { background: #1e7e4a; border-color: #1e7e4a; }
+    .remark-item.issue.active .ri-box { background: #b91c1c; border-color: #b91c1c; }
+    .remark-item.pos.active   .ri-box::after,
+    .remark-item.issue.active .ri-box::after { content: '✓'; }
+    .remark-item.pos.active   .ri-label { color: #1e7e4a; font-weight: 600; }
+    .remark-item.issue.active .ri-label { color: #b91c1c; font-weight: 600; }
+
+    .grid-remarks-ta {
+      display: block; width: calc(100% - 40px); margin: 10px 20px 0;
+      padding: 8px 10px; border: 1.5px solid #c8dce8; border-radius: 5px;
+      font-size: 0.82rem; resize: vertical; min-height: 68px;
+      color: #1a202c; font-family: inherit;
+    }
+    .grid-remarks-ta:focus { outline: none; border-color: #2e7da6; box-shadow: 0 0 0 3px rgba(46,125,166,0.12); }
+
+    /* ── Notes ─────────────────────────────────────────────────────────────── */
+    .grid-notes-section { padding: 10px 20px 14px; border-bottom: 1px solid #eef0f3; }
+    .grid-notes {
+      width: 100%; padding: 8px 10px; border: 1.5px solid #c8dce8;
+      border-radius: 5px; font-size: 0.82rem; resize: vertical;
+      min-height: 50px; color: #1a202c; font-family: inherit;
+    }
+    .grid-notes:focus { outline: none; border-color: #2e7da6; box-shadow: 0 0 0 3px rgba(46,125,166,0.12); }
+
+    /* ── Survey complete (inline) ──────────────────────────────────────────── */
+    .survey-inline-btn {
+      padding: 4px 11px; border: 1.5px solid #1e7e4a; border-radius: 20px;
+      background: white; color: #1e7e4a; font-size: 0.75rem; font-weight: 700;
+      cursor: pointer; white-space: nowrap; transition: all 0.15s; font-family: inherit;
+      flex-shrink: 0;
+    }
+    .survey-inline-btn:hover { background: #f0fdf4; }
+    .survey-inline-btn.done  { background: #1e7e4a; color: white; }
+
+    /* ── Add grid button ───────────────────────────────────────────────────── */
+    .add-grid-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin: 12px 20px 16px; padding: 9px 16px;
+      background: #eef6fb; border: 1.5px dashed #2e7da6; border-radius: 6px;
+      color: #25567a; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+      width: calc(100% - 40px); transition: background 0.15s; font-family: inherit;
+    }
+    .add-grid-btn:hover { background: #dbeef8; }
+
+    .grid-badge {
+      margin-left: auto; background: rgba(255,255,255,0.18);
+      border-radius: 20px; padding: 2px 10px; font-size: 0.72rem; font-weight: 600;
+    }
+    .grid-badge.has-entries { background: rgba(34,197,94,0.35); }
+
+    @media (max-width: 560px) {
+      .pct-btn { font-size: 0.7rem; padding: 3px 8px; }
+      .lbl-loc, .grid-loc { width: 58px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ STICKY RIBBON ══════════════ -->
+<div class="ribbon">
+  <img src="tec_solution_pro_logo.jpg" alt="Logo" class="ribbon-logo" />
+  <span class="ribbon-company">Tec Solution Pro</span>
+  <div class="ribbon-spacer"></div>
+  <button type="button" class="ribbon-submit-btn" id="ribbon-submit-btn">Submit</button>
+</div>
+
+<!-- ══════════════ PAGE HEADER ══════════════ -->
+<header>
+  <div class="header-inner">
+    <img src="tec_solution_pro_logo.jpg" alt="Tec Solution Pro" class="header-logo" />
+    <div class="header-text">
+      <div class="header-company">Tec Solution Pro</div>
+      <div class="header-title">Report &amp; Remarks</div>
+      <div class="header-sub">DJI Matrice 400 — End-of-day mission summary</div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════ FORM ══════════════ -->
+<form id="checklist-form" method="POST">
+<div class="container">
+
+  <!-- Mission Info -->
+  <div class="card">
+    <div class="card-title">Mission Information</div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="pilot-name">Pilot Name *</label>
+          <input type="text" id="pilot-name" name="pilot_name" required placeholder="Enter pilot name" />
+        </div>
+        <div class="form-group">
+          <label for="reported-by">Reported By *</label>
+          <input type="text" id="reported-by" name="reported_by" required placeholder="Your name" />
+        </div>
+        <div class="form-group">
+          <label for="mission-date">Mission Date *</label>
+          <input type="date" id="mission-date" name="mission_date" required />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid Completion (dynamic) -->
+  <div class="card">
+    <div class="section-header">
+      Grid Completion
+      <span class="grid-badge" id="grid-badge">0 grids</span>
+    </div>
+    <div id="grids-container"></div>
+    <button type="button" class="add-grid-btn" id="add-grid-btn">＋ Add Grid</button>
+  </div>
+
+  <div id="success-msg">
+    <div class="success-title">&#10003; Report submitted successfully.</div>
+    <div class="success-reminder">
+      Thank you for the end-of-day report. Rest well and prepare for tomorrow's mission.
+    </div>
+  </div>
+
+</div>
+</form>
+
+<footer>Tec Solution Pro &nbsp;&mdash;&nbsp; Report &amp; Remarks &nbsp;&mdash;&nbsp; DJI Matrice 400 &nbsp;&mdash;&nbsp; <small>v5.0.0</small></footer>
+
+<script>
+  const PERCENTAGES = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10];
+
+  /* Positive outcomes — alphabetical */
+  const POSITIVE = [
+    'All areas covered',
+    'Beautiful survey',
+    'Great teamwork',
+    'Mission accomplished',
+    'No issues at all',
+    'Perfect conditions',
+    'Smooth flight',
+  ];
+
+  /* Issues & incidents — alphabetical */
+  const ISSUES = [
+    'Battery performance reduced (heat)',
+    'Difficult terrain / access',
+    'Drone damage (propellers / body)',
+    'Emergency / forced landing',
+    'Firmware update required',
+    'LiDAR malfunction / error',
+    'Lost equipment (landing pad / accessories)',
+    'Memory card(s) full',
+    'No phone / internet at site',
+    'Rain during mission',
+    'RC signal problem',
+    'Restricted / unauthorized airspace',
+    'RTK / GPS signal problem',
+    'Sand / dust storm',
+    'Sensor blued',
+    'Signal lost — fog / rain',
+    'Signal lost — mountain / obstacle',
+    'Strong wind / gusts',
+    'Temperature too high / extreme heat',
+    'Vehicle / car problem',
+    'Wild animal encounter',
+  ];
+
+  const pctBtnsHTML = PERCENTAGES
+    .map(p => `<button type="button" class="pct-btn" data-pct="${p}" onclick="selectPct(this)">${p}%</button>`)
+    .join('');
+
+  function makeItems(arr, cls) {
+    return arr.map(t =>
+      `<button type="button" class="remark-item ${cls}" data-chip="${t}" onclick="toggleChip(this)">` +
+      `<span class="ri-box"></span><span class="ri-label">${t}</span>` +
+      `</button>`
+    ).join('');
+  }
+
+  const posItemsHTML   = makeItems(POSITIVE, 'pos');
+  const issueItemsHTML = makeItems(ISSUES,   'issue');
+
+  function buildGridHTML(n) {
+    return `
+      <div class="grid-entry-header">
+        <span class="grid-num">Grid ${n}</span>
+        <button type="button" class="remove-grid-btn" onclick="removeGrid(this)" title="Remove">✕</button>
+      </div>
+
+      <div class="grid-name-section">
+        <div class="grid-name-labels">
+          <span class="lbl lbl-loc">Location</span>
+          <span class="lbl lbl-sep"></span>
+          <span class="lbl lbl-part">Site</span>
+          <span class="lbl lbl-sep"></span>
+          <span class="lbl lbl-part">Grid</span>
+        </div>
+        <div class="grid-name-row">
+          <input type="text" class="grid-loc" placeholder="RUH" maxlength="10" />
+          <span class="grid-sep">—</span>
+          <input type="text" class="grid-site" placeholder="Site01" />
+          <span class="grid-sep">—</span>
+          <input type="text" class="grid-grid" placeholder="Grid01" />
+        </div>
+      </div>
+
+      <div class="pct-row">
+        <span class="pct-label">Complete</span>
+        <div class="pct-buttons">${pctBtnsHTML}</div>
+        <button type="button" class="survey-inline-btn" onclick="toggleSurveyComplete(this)">No Further Flights</button>
+      </div>
+
+      <div class="grid-remarks-section">
+        <div class="grid-section-label">Remarks</div>
+        <div class="remarks-group-header pos">&#10003; All Good</div>
+        <div class="remarks-cols">${posItemsHTML}</div>
+        <div class="remarks-group-header issue" style="margin-top:6px;">&#9888; Issues &amp; Incidents</div>
+        <div class="remarks-cols">${issueItemsHTML}</div>
+        <textarea class="grid-remarks-ta" placeholder="Select above or type freely — remarks will appear here."></textarea>
+      </div>
+
+      <div class="grid-notes-section">
+        <div class="grid-section-label" style="padding-bottom:6px;">Notes / Observations</div>
+        <textarea class="grid-notes" placeholder="Access notes, observations, recommendations..."></textarea>
+      </div>
+
+    `;
+  }
+
+  /* ── Grid management ──────────────────────────────────────────────────────── */
+  function addGrid() {
+    const n   = document.querySelectorAll('.grid-entry').length + 1;
+    const div = document.createElement('div');
+    div.className = 'grid-entry';
+    div.innerHTML = buildGridHTML(n);
+    document.getElementById('grids-container').appendChild(div);
+    updateGridBadge();
+    div.querySelector('.grid-loc').focus();
+  }
+
+  function removeGrid(btn) {
+    btn.closest('.grid-entry').remove();
+    renumberGrids();
+    updateGridBadge();
+  }
+
+  function renumberGrids() {
+    document.querySelectorAll('.grid-entry').forEach((entry, i) => {
+      entry.querySelector('.grid-num').textContent = 'Grid ' + (i + 1);
+    });
+  }
+
+  function updateGridBadge() {
+    const n     = document.querySelectorAll('.grid-entry').length;
+    const badge = document.getElementById('grid-badge');
+    badge.textContent = n === 0 ? '0 grids' : n + (n === 1 ? ' grid' : ' grids');
+    badge.className   = 'grid-badge' + (n > 0 ? ' has-entries' : '');
+  }
+
+  /* ── Interactions ─────────────────────────────────────────────────────────── */
+  function selectPct(btn) {
+    btn.closest('.pct-buttons').querySelectorAll('.pct-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function toggleChip(btn) {
+    const text   = btn.dataset.chip;
+    const ta     = btn.closest('.grid-remarks-section').querySelector('.grid-remarks-ta');
+    const active = btn.classList.toggle('active');
+    if (active) {
+      ta.value = ta.value.trim() ? ta.value.trim() + '\n' + text : text;
+    } else {
+      ta.value = ta.value.split('\n').filter(l => l.trim() !== text).join('\n').trim();
+    }
+  }
+
+  function toggleSurveyComplete(btn) {
+    const done   = btn.classList.toggle('done');
+    const header = btn.closest('.grid-entry').querySelector('.grid-entry-header');
+    btn.textContent = done ? '✓ No Further Flights' : 'No Further Flights';
+    header.classList.toggle('complete-header', done);
+  }
+
+  document.getElementById('add-grid-btn').addEventListener('click', addGrid);
+
+  /* ── Serialise into standardised named hidden fields before checklist.js ── */
+  document.getElementById('checklist-form').addEventListener('submit', function () {
+    document.querySelectorAll('[data-dyn-grid]').forEach(el => el.remove());
+    const form = document.getElementById('checklist-form');
+
+    document.querySelectorAll('.grid-entry').forEach((entry, i) => {
+      const n    = i + 1;
+      const loc  = entry.querySelector('.grid-loc').value.trim();
+      const site = entry.querySelector('.grid-site').value.trim();
+      const grid = entry.querySelector('.grid-grid').value.trim();
+      const name = [loc, site, grid].filter(Boolean).join('-') || `Grid_${n}`;
+      const pct  = entry.querySelector('.pct-btn.active')?.dataset.pct;
+      const remarks = entry.querySelector('.grid-remarks-ta').value.trim();
+      const notes   = entry.querySelector('.grid-notes').value.trim();
+      const status  = entry.querySelector('.survey-inline-btn').classList.contains('done')
+        ? 'Survey Complete' : 'In Progress';
+
+      const fields = {
+        [`Grid_${n}_Name`]:    name,
+        [`Grid_${n}_Pct`]:     pct ? pct + '%' : '',
+        [`Grid_${n}_Remarks`]: remarks,
+        [`Grid_${n}_Notes`]:   notes,
+        [`Grid_${n}_Status`]:  status,
+      };
+
+      Object.entries(fields).forEach(([fieldName, value]) => {
+        const input = document.createElement('input');
+        input.type  = 'hidden';
+        input.name  = fieldName;
+        input.value = value;
+        input.dataset.dynGrid = 'true';
+        form.appendChild(input);
+      });
+    });
+  }, true);
+</script>
+
+<script>
+  window.CHECKLIST_CONFIG = {
+    submitUrl:     'https://script.google.com/macros/s/AKfycbyzYf1uG9ML91rWdNbF1_zaTeeG9AjDxAdJVQjV-Fx8BpysEWVr5_NjYOtwHjACQB6w/exec',
+    formName:      'Report-Remarks',
+    subjectPrefix: 'Report & Remarks',
+    sectionDefs:   []
+  };
+</script>
+<script src="js/checklist.js"></script>
+
+</body>
+</html>

@@ -68,7 +68,9 @@
       });
 
       // Each checkbox → column header = label text, value = Yes / No
+      // Skip per-grid checkboxes (data-grid-only) — they are serialised into grid_summary
       form.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        if (cb.dataset.gridOnly) return;
         const span = cb.closest('label') && cb.closest('label').querySelector('span');
         const header = span ? span.textContent.trim() : cb.name;
         data[header] = cb.checked ? 'Yes' : 'No';

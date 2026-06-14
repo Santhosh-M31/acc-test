@@ -339,6 +339,22 @@ header {
 .success-priority-list li { margin-bottom: 3px; font-size: 0.93rem; }
 .priority-1 { font-weight: 700; }
 
+/* ── Report prompt button (post-flight success) ─────────────────────────────── */
+.report-prompt-btn {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 10px 24px;
+  background: var(--blue);
+  color: white;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: background 0.15s;
+}
+.report-prompt-btn:hover { background: var(--navy); }
+
 /* ── Footer ─────────────────────────────────────────────────────────────────── */
 footer {
   text-align: center;

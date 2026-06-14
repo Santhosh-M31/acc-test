@@ -115,8 +115,9 @@ h1 {
   font-size: 1.4rem;
   flex-shrink: 0;
 }
-.icon-pre  { background: #e8f4fd; }
-.icon-post { background: #edfaf3; }
+.icon-pre    { background: #e8f4fd; }
+.icon-post   { background: #edfaf3; }
+.icon-report { background: #fef9ec; }
 .link-title {
   font-size: 1rem;
   font-weight: 700;
