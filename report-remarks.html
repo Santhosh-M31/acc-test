@@ -301,14 +301,14 @@
 
       <div class="grid-name-section">
         <div class="grid-name-labels">
-          <span class="lbl lbl-loc">Code *</span>
+          <span class="lbl lbl-loc">Region *</span>
           <span class="lbl lbl-sep"></span>
           <span class="lbl lbl-part">Site # *</span>
           <span class="lbl lbl-sep"></span>
           <span class="lbl lbl-part">Grid # *</span>
         </div>
         <div class="grid-name-row">
-          <input type="text" class="grid-loc" placeholder="e.g. RUH" maxlength="10" />
+          <input type="text" class="grid-loc" placeholder="e.g. RUH" maxlength="3" />
           <span class="grid-sep">—</span>
           <input type="text" class="grid-site" placeholder="01" />
           <span class="grid-sep">—</span>
@@ -348,9 +348,19 @@
     div.innerHTML = buildGridHTML(n);
     document.getElementById('grids-container').appendChild(div);
 
-    /* Clear error highlight as soon as user types */
-    div.querySelectorAll('.grid-loc, .grid-site, .grid-grid').forEach(inp => {
-      inp.addEventListener('input', () => inp.classList.remove('input-error'));
+    /* Region: auto-uppercase, letters only, max 3 */
+    const locInp = div.querySelector('.grid-loc');
+    locInp.addEventListener('input', () => {
+      locInp.value = locInp.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
+      locInp.classList.remove('input-error');
+    });
+
+    /* Site / Grid: digits only */
+    div.querySelectorAll('.grid-site, .grid-grid').forEach(inp => {
+      inp.addEventListener('input', () => {
+        inp.value = inp.value.replace(/[^0-9]/g, '');
+        inp.classList.remove('input-error');
+      });
     });
 
     updateGridBadge();
@@ -404,12 +414,21 @@
 
   /* ── Validate + serialise before checklist.js runs ────────────────────── */
   document.getElementById('checklist-form').addEventListener('submit', function (e) {
-    /* Validate: all three name parts must be filled for every grid entry */
+    /* Validate all grid name fields */
     let valid = true;
     document.querySelectorAll('.grid-entry').forEach(entry => {
-      ['grid-loc', 'grid-site', 'grid-grid'].forEach(cls => {
-        const inp = entry.querySelector('.' + cls);
-        if (!inp.value.trim()) {
+      const loc  = entry.querySelector('.grid-loc');
+      const site = entry.querySelector('.grid-site');
+      const grid = entry.querySelector('.grid-grid');
+
+      /* Region: exactly 3 uppercase letters */
+      if (!/^[A-Z]{3}$/.test(loc.value.trim())) {
+        loc.classList.add('input-error');
+        valid = false;
+      }
+      /* Site / Grid: non-empty and digits only */
+      [site, grid].forEach(inp => {
+        if (!inp.value.trim() || !/^\d+$/.test(inp.value.trim())) {
           inp.classList.add('input-error');
           valid = false;
         }
