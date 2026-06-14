@@ -308,11 +308,14 @@
           <span class="lbl lbl-part">Grid # *</span>
         </div>
         <div class="grid-name-row">
-          <input type="text" class="grid-loc" placeholder="e.g. RUH" maxlength="3" />
+          <input type="text" class="grid-loc" placeholder="e.g. RUH" maxlength="3"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,3);this.classList.remove('input-error')" />
           <span class="grid-sep">—</span>
-          <input type="text" class="grid-site" placeholder="01" />
+          <input type="text" class="grid-site" placeholder="01" inputmode="numeric"
+            oninput="this.value=this.value.replace(/[^0-9]/g,'');this.classList.remove('input-error')" />
           <span class="grid-sep">—</span>
-          <input type="text" class="grid-grid" placeholder="01" />
+          <input type="text" class="grid-grid" placeholder="01" inputmode="numeric"
+            oninput="this.value=this.value.replace(/[^0-9]/g,'');this.classList.remove('input-error')" />
         </div>
         <div class="grid-name-hint">Type the number only — e.g. RUH · 02 · 01 &rarr; RUH-Site02-Grid01</div>
       </div>
@@ -347,21 +350,6 @@
     div.className = 'grid-entry';
     div.innerHTML = buildGridHTML(n);
     document.getElementById('grids-container').appendChild(div);
-
-    /* Region: auto-uppercase, letters only, max 3 */
-    const locInp = div.querySelector('.grid-loc');
-    locInp.addEventListener('input', () => {
-      locInp.value = locInp.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
-      locInp.classList.remove('input-error');
-    });
-
-    /* Site / Grid: digits only */
-    div.querySelectorAll('.grid-site, .grid-grid').forEach(inp => {
-      inp.addEventListener('input', () => {
-        inp.value = inp.value.replace(/[^0-9]/g, '');
-        inp.classList.remove('input-error');
-      });
-    });
 
     updateGridBadge();
     div.querySelector('.grid-loc').focus();
