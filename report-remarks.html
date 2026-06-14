@@ -48,6 +48,12 @@
     .grid-loc:focus, .grid-site:focus, .grid-grid:focus {
       outline: none; border-color: #2e7da6; box-shadow: 0 0 0 3px rgba(46,125,166,0.12);
     }
+    .grid-loc.input-error, .grid-site.input-error, .grid-grid.input-error {
+      border-color: #b91c1c !important; box-shadow: 0 0 0 3px rgba(185,28,28,0.12) !important;
+    }
+    .grid-name-hint {
+      font-size: 0.68rem; color: #94a3b8; margin-top: 5px; letter-spacing: 0.2px;
+    }
 
     /* ── Completion % ──────────────────────────────────────────────────────── */
     .pct-row {
@@ -295,19 +301,20 @@
 
       <div class="grid-name-section">
         <div class="grid-name-labels">
-          <span class="lbl lbl-loc">Location</span>
+          <span class="lbl lbl-loc">Code *</span>
           <span class="lbl lbl-sep"></span>
-          <span class="lbl lbl-part">Site</span>
+          <span class="lbl lbl-part">Site # *</span>
           <span class="lbl lbl-sep"></span>
-          <span class="lbl lbl-part">Grid</span>
+          <span class="lbl lbl-part">Grid # *</span>
         </div>
         <div class="grid-name-row">
-          <input type="text" class="grid-loc" placeholder="RUH" maxlength="10" />
+          <input type="text" class="grid-loc" placeholder="e.g. RUH" maxlength="10" />
           <span class="grid-sep">—</span>
-          <input type="text" class="grid-site" placeholder="Site01" />
+          <input type="text" class="grid-site" placeholder="01" />
           <span class="grid-sep">—</span>
-          <input type="text" class="grid-grid" placeholder="Grid01" />
+          <input type="text" class="grid-grid" placeholder="01" />
         </div>
+        <div class="grid-name-hint">Type the number only — e.g. RUH · 02 · 01 &rarr; RUH-Site02-Grid01</div>
       </div>
 
       <div class="pct-row">
@@ -340,6 +347,12 @@
     div.className = 'grid-entry';
     div.innerHTML = buildGridHTML(n);
     document.getElementById('grids-container').appendChild(div);
+
+    /* Clear error highlight as soon as user types */
+    div.querySelectorAll('.grid-loc, .grid-site, .grid-grid').forEach(inp => {
+      inp.addEventListener('input', () => inp.classList.remove('input-error'));
+    });
+
     updateGridBadge();
     div.querySelector('.grid-loc').focus();
   }
@@ -389,16 +402,37 @@
 
   document.getElementById('add-grid-btn').addEventListener('click', addGrid);
 
-  /* ── Serialise into standardised named hidden fields before checklist.js ── */
-  document.getElementById('checklist-form').addEventListener('submit', function () {
+  /* ── Validate + serialise before checklist.js runs ────────────────────── */
+  document.getElementById('checklist-form').addEventListener('submit', function (e) {
+    /* Validate: all three name parts must be filled for every grid entry */
+    let valid = true;
+    document.querySelectorAll('.grid-entry').forEach(entry => {
+      ['grid-loc', 'grid-site', 'grid-grid'].forEach(cls => {
+        const inp = entry.querySelector('.' + cls);
+        if (!inp.value.trim()) {
+          inp.classList.add('input-error');
+          valid = false;
+        }
+      });
+    });
+    if (!valid) {
+      e.stopImmediatePropagation(); /* prevent checklist.js from running */
+      document.querySelector('.input-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
     document.querySelectorAll('[data-dyn-grid]').forEach(el => el.remove());
     const form = document.getElementById('checklist-form');
 
     document.querySelectorAll('.grid-entry').forEach((entry, i) => {
-      const n    = i + 1;
-      const loc  = entry.querySelector('.grid-loc').value.trim();
-      const site = entry.querySelector('.grid-site').value.trim();
-      const grid = entry.querySelector('.grid-grid').value.trim();
+      const n       = i + 1;
+      const loc     = entry.querySelector('.grid-loc').value.trim();
+      const siteRaw = entry.querySelector('.grid-site').value.trim();
+      const gridRaw = entry.querySelector('.grid-grid').value.trim();
+
+      /* Auto-prefix Site / Grid if user typed only a number */
+      const site = /^site/i.test(siteRaw) ? siteRaw : 'Site' + siteRaw;
+      const grid = /^grid/i.test(gridRaw) ? gridRaw : 'Grid' + gridRaw;
       const name = [loc, site, grid].filter(Boolean).join('-') || `Grid_${n}`;
       const pct  = entry.querySelector('.pct-btn.active')?.dataset.pct;
       const remarks = entry.querySelector('.grid-remarks-ta').value.trim();
