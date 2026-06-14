@@ -400,70 +400,79 @@
 
   document.getElementById('add-grid-btn').addEventListener('click', addGrid);
 
-  /* ── Validate + serialise before checklist.js runs ────────────────────── */
-  document.getElementById('checklist-form').addEventListener('submit', function (e) {
+  /* ── Submit: one row per grid with fixed column names ──────────────────── */
+  document.getElementById('checklist-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+
     /* Validate all grid name fields */
     let valid = true;
     document.querySelectorAll('.grid-entry').forEach(entry => {
       const loc  = entry.querySelector('.grid-loc');
       const site = entry.querySelector('.grid-site');
       const grid = entry.querySelector('.grid-grid');
-
-      /* Region: exactly 3 uppercase letters */
-      if (!/^[A-Z]{3}$/.test(loc.value.trim())) {
-        loc.classList.add('input-error');
-        valid = false;
-      }
-      /* Site / Grid: non-empty and digits only */
+      if (!/^[A-Z]{3}$/.test(loc.value.trim())) { loc.classList.add('input-error');  valid = false; }
       [site, grid].forEach(inp => {
-        if (!inp.value.trim() || !/^\d+$/.test(inp.value.trim())) {
-          inp.classList.add('input-error');
-          valid = false;
-        }
+        if (!inp.value.trim() || !/^\d+$/.test(inp.value.trim())) { inp.classList.add('input-error'); valid = false; }
       });
     });
     if (!valid) {
-      e.stopImmediatePropagation(); /* prevent checklist.js from running */
       document.querySelector('.input-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
-    document.querySelectorAll('[data-dyn-grid]').forEach(el => el.remove());
-    const form = document.getElementById('checklist-form');
+    const btn = document.getElementById('ribbon-submit-btn');
+    btn.textContent = 'Submitting…';
+    btn.disabled = true;
 
-    document.querySelectorAll('.grid-entry').forEach((entry, i) => {
-      const n       = i + 1;
+    const pilotName   = document.getElementById('pilot-name').value.trim();
+    const reportedBy  = document.getElementById('reported-by').value.trim();
+    const missionDate = document.getElementById('mission-date').value;
+    const submitUrl   = window.CHECKLIST_CONFIG.submitUrl;
+
+    const promises = [...document.querySelectorAll('.grid-entry')].map(entry => {
       const loc     = entry.querySelector('.grid-loc').value.trim();
       const siteRaw = entry.querySelector('.grid-site').value.trim();
       const gridRaw = entry.querySelector('.grid-grid').value.trim();
-
-      /* Auto-prefix Site / Grid if user typed only a number */
-      const site = /^site/i.test(siteRaw) ? siteRaw : 'Site' + siteRaw;
-      const grid = /^grid/i.test(gridRaw) ? gridRaw : 'Grid' + gridRaw;
-      const name = [loc, site, grid].filter(Boolean).join('-') || `Grid_${n}`;
-      const pct  = entry.querySelector('.pct-btn.active')?.dataset.pct;
+      const site    = /^site/i.test(siteRaw) ? siteRaw : 'Site' + siteRaw;
+      const grid    = /^grid/i.test(gridRaw) ? gridRaw : 'Grid' + gridRaw;
+      const name    = [loc, site, grid].join('-');
+      const pct     = entry.querySelector('.pct-btn.active')?.dataset.pct;
       const remarks = entry.querySelector('.grid-remarks-ta').value.trim();
       const notes   = entry.querySelector('.grid-notes').value.trim();
       const status  = entry.querySelector('.survey-inline-btn').classList.contains('done')
         ? 'Survey Complete' : 'In Progress';
 
-      const fields = {
-        [`Grid_${n}_Name`]:    name,
-        [`Grid_${n}_Pct`]:     pct ? pct + '%' : '',
-        [`Grid_${n}_Remarks`]: remarks,
-        [`Grid_${n}_Notes`]:   notes,
-        [`Grid_${n}_Status`]:  status,
+      const data = {
+        pilot_name:   pilotName,
+        reported_by:  reportedBy,
+        mission_date: missionDate,
+        Grid_Name:    name,
+        Grid_Pct:     pct ? pct + '%' : '',
+        Grid_Remarks: remarks,
+        Grid_Notes:   notes,
+        Grid_Status:  status,
+        _form:        'Report-Remarks',
+        _subject:     `Report & Remarks — ${name} | ${missionDate}`,
       };
-
-      Object.entries(fields).forEach(([fieldName, value]) => {
-        const input = document.createElement('input');
-        input.type  = 'hidden';
-        input.name  = fieldName;
-        input.value = value;
-        input.dataset.dynGrid = 'true';
-        form.appendChild(input);
-      });
+      return fetch(submitUrl, { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'text/plain' } });
     });
+
+    try {
+      const results = await Promise.all(promises);
+      const allOk   = results.every(r => r.ok);
+      if (allOk) {
+        document.getElementById('success-msg').style.display = 'block';
+        btn.textContent = 'Submitted';
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      } else {
+        btn.textContent = 'Server Error — Retry';
+        btn.disabled = false;
+      }
+    } catch (err) {
+      btn.textContent = 'Network Error — Retry';
+      btn.disabled = false;
+    }
   }, true);
 </script>
 
