@@ -194,6 +194,30 @@
     }
     .grid-badge.has-entries { background: rgba(34,197,94,0.35); }
 
+    /* ── Success summary ──────────────────────────────────────────────────── */
+    .success-total {
+      font-size: 0.85rem; font-weight: 700; color: #25567a; margin: 10px 0 6px;
+    }
+    .success-grid-list {
+      list-style: none; padding: 0; margin: 0 0 14px;
+    }
+    .success-grid-list li {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 6px 0; font-size: 0.82rem; color: #1a202c;
+      border-bottom: 1px solid #d1fae5;
+    }
+    .success-grid-list li:last-child { border-bottom: none; }
+    .sgl-name   { font-weight: 700; }
+    .sgl-pct    { color: #1e7e4a; font-weight: 600; font-size: 0.78rem; }
+    .sgl-status { color: #5a7385; font-size: 0.75rem; }
+    .submit-again-btn {
+      display: inline-block; padding: 9px 22px;
+      background: #25567a; color: white; border: none; border-radius: 6px;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer; font-family: inherit;
+      transition: background 0.15s; margin-top: 4px;
+    }
+    .submit-again-btn:hover { background: #1e4460; }
+
     @media (max-width: 560px) {
       .grid-name-section { padding: 12px 14px 14px; }
       .pct-row           { padding: 10px 14px; }
@@ -271,6 +295,9 @@
     <div class="success-reminder">
       Thank you for the end-of-day report. Rest well and prepare for tomorrow's mission.
     </div>
+    <div class="success-total" id="success-total"></div>
+    <ul class="success-grid-list" id="success-grid-list"></ul>
+    <button type="button" class="submit-again-btn" onclick="resetForm()">Submit Another Report</button>
   </div>
 
 </div>
@@ -451,6 +478,22 @@
     header.classList.toggle('complete-header', done);
   }
 
+  function resetForm() {
+    document.getElementById('grids-container').innerHTML = '';
+    document.getElementById('success-msg').style.display = 'none';
+    document.getElementById('success-grid-list').innerHTML = '';
+    document.getElementById('success-total').textContent = '';
+    document.getElementById('pilot-name').value = '';
+    document.getElementById('reported-by').value = '';
+    document.getElementById('mission-date').value = '';
+    const btn = document.getElementById('ribbon-submit-btn');
+    btn.textContent = 'Submit';
+    btn.disabled = false;
+    updateGridBadge();
+    addGrid();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   document.getElementById('add-grid-btn').addEventListener('click', addGrid);
 
   /* ── Submit: one row per grid with fixed column names ──────────────────── */
@@ -514,6 +557,25 @@
       const results = await Promise.all(promises);
       const allOk   = results.every(r => r.ok);
       if (allOk) {
+        const gridEntries = [...document.querySelectorAll('.grid-entry')].map(entry => {
+          const loc     = entry.querySelector('.grid-loc').value.trim();
+          const siteRaw = entry.querySelector('.grid-site').value.trim();
+          const gridRaw = entry.querySelector('.grid-grid').value.trim();
+          const site    = /^site/i.test(siteRaw) ? siteRaw : 'Site' + siteRaw;
+          const grid    = /^grid/i.test(gridRaw) ? gridRaw : 'Grid' + gridRaw;
+          const name    = [loc, site, grid].join('-');
+          const pct     = entry.querySelector('.pct-btn.active')?.dataset.pct;
+          const status  = entry.querySelector('.status-btn.active')?.dataset.status || 'In Progress';
+          return { name, pct, status };
+        });
+        const total = gridEntries.length;
+        document.getElementById('success-total').textContent =
+          total + ' grid' + (total !== 1 ? 's' : '') + ' submitted';
+        document.getElementById('success-grid-list').innerHTML = gridEntries.map(g =>
+          `<li><span class="sgl-name">${g.name}</span>` +
+          `<span class="sgl-pct">${g.pct ? g.pct + '%' : '—'}</span>` +
+          `<span class="sgl-status">${g.status}</span></li>`
+        ).join('');
         document.getElementById('success-msg').style.display = 'block';
         btn.textContent = 'Submitted';
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
