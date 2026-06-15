@@ -194,6 +194,44 @@
     }
     .grid-badge.has-entries { background: rgba(34,197,94,0.35); }
 
+    /* ── Confirm panel ───────────────────────────────────────────────────── */
+    #confirm-panel {
+      display: none; background: #fff8e7;
+      border: 2px solid #f59e0b; border-radius: 10px;
+      padding: 20px; margin: 0 0 16px;
+    }
+    .confirm-title {
+      font-size: 1rem; font-weight: 700; color: #92400e; margin-bottom: 4px;
+    }
+    .confirm-subtitle {
+      font-size: 0.78rem; color: #78350f; margin-bottom: 12px;
+    }
+    .confirm-total {
+      font-size: 0.82rem; font-weight: 700; color: #92400e; margin-bottom: 6px;
+    }
+    .confirm-grid-list {
+      list-style: none; padding: 0; margin: 0 0 16px;
+    }
+    .confirm-grid-list li {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 6px 0; font-size: 0.82rem; color: #1a202c;
+      border-bottom: 1px solid #fde68a;
+    }
+    .confirm-grid-list li:last-child { border-bottom: none; }
+    .confirm-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .confirm-submit-btn {
+      padding: 9px 22px; background: #1e7e4a; color: white;
+      border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 700;
+      cursor: pointer; font-family: inherit; transition: background 0.15s; min-width: 130px;
+    }
+    .confirm-submit-btn:hover { background: #166039; }
+    .confirm-edit-btn {
+      padding: 9px 22px; background: white; color: #5a7385;
+      border: 1.5px solid #c8dce8; border-radius: 6px; font-size: 0.85rem;
+      font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .confirm-edit-btn:hover { border-color: #2e7da6; color: #2e7da6; }
+
     /* ── Success summary ──────────────────────────────────────────────────── */
     .success-total {
       font-size: 0.85rem; font-weight: 700; color: #25567a; margin: 10px 0 6px;
@@ -288,6 +326,17 @@
     </div>
     <div id="grids-container"></div>
     <button type="button" class="add-grid-btn" id="add-grid-btn">＋ Add Grid</button>
+  </div>
+
+  <div id="confirm-panel">
+    <div class="confirm-title">&#9998; Review &amp; Confirm</div>
+    <div class="confirm-subtitle">Auto-submitting in <span id="countdown-num">5</span>s — or choose below.</div>
+    <div class="confirm-total" id="confirm-total"></div>
+    <ul class="confirm-grid-list" id="confirm-grid-list"></ul>
+    <div class="confirm-actions">
+      <button type="button" class="confirm-submit-btn" id="confirm-submit-btn" onclick="confirmSubmit()">Confirm (5)</button>
+      <button type="button" class="confirm-edit-btn" onclick="editReport()">Edit</button>
+    </div>
   </div>
 
   <div id="success-msg">
@@ -478,6 +527,119 @@
     header.classList.toggle('complete-header', done);
   }
 
+  let _countdownTimer      = null;
+  let _pendingGridEntries  = [];
+
+  function collectGridEntries() {
+    return [...document.querySelectorAll('.grid-entry')].map(entry => {
+      const loc     = entry.querySelector('.grid-loc').value.trim();
+      const siteRaw = entry.querySelector('.grid-site').value.trim();
+      const gridRaw = entry.querySelector('.grid-grid').value.trim();
+      const site    = /^site/i.test(siteRaw) ? siteRaw : 'Site' + siteRaw;
+      const grid    = /^grid/i.test(gridRaw) ? gridRaw : 'Grid' + gridRaw;
+      const name    = [loc, site, grid].join('-');
+      const pct     = entry.querySelector('.pct-btn.active')?.dataset.pct;
+      const remarks = entry.querySelector('.grid-remarks-ta').value.trim();
+      const notes   = entry.querySelector('.grid-notes').value.trim();
+      const status  = entry.querySelector('.status-btn.active')?.dataset.status || 'In Progress';
+      return { name, pct, remarks, notes, status };
+    });
+  }
+
+  function showConfirmPanel(gridEntries) {
+    _pendingGridEntries = gridEntries;
+    const total = gridEntries.length;
+    document.getElementById('confirm-total').textContent =
+      total + ' grid' + (total !== 1 ? 's' : '') + ' ready to submit';
+    document.getElementById('confirm-grid-list').innerHTML = gridEntries.map(g =>
+      `<li><span class="sgl-name">${g.name}</span>` +
+      `<span class="sgl-pct">${g.pct ? g.pct + '%' : '—'}</span>` +
+      `<span class="sgl-status">${g.status}</span></li>`
+    ).join('');
+    document.getElementById('confirm-panel').style.display = 'block';
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
+    let secs = 5;
+    const confirmBtn    = document.getElementById('confirm-submit-btn');
+    const countdownSpan = document.getElementById('countdown-num');
+    confirmBtn.textContent  = `Confirm (${secs})`;
+    countdownSpan.textContent = secs;
+
+    _countdownTimer = setInterval(() => {
+      secs--;
+      confirmBtn.textContent    = `Confirm (${secs})`;
+      countdownSpan.textContent = secs;
+      if (secs <= 0) {
+        clearInterval(_countdownTimer);
+        _countdownTimer = null;
+        confirmSubmit();
+      }
+    }, 1000);
+  }
+
+  function editReport() {
+    if (_countdownTimer) { clearInterval(_countdownTimer); _countdownTimer = null; }
+    document.getElementById('confirm-panel').style.display = 'none';
+    const ribbonBtn = document.getElementById('ribbon-submit-btn');
+    ribbonBtn.textContent = 'Submit';
+    ribbonBtn.disabled = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function confirmSubmit() {
+    if (_countdownTimer) { clearInterval(_countdownTimer); _countdownTimer = null; }
+    document.getElementById('confirm-panel').style.display = 'none';
+
+    const ribbonBtn = document.getElementById('ribbon-submit-btn');
+    ribbonBtn.textContent = 'Submitting…';
+    ribbonBtn.disabled = true;
+
+    const pilotName   = document.getElementById('pilot-name').value.trim();
+    const reportedBy  = document.getElementById('reported-by').value.trim();
+    const missionDate = document.getElementById('mission-date').value;
+    const submitUrl   = window.CHECKLIST_CONFIG.submitUrl;
+
+    const promises = _pendingGridEntries.map(g => {
+      const data = {
+        pilot_name:   pilotName,
+        reported_by:  reportedBy,
+        mission_date: missionDate,
+        Grid_Name:    g.name,
+        Grid_Pct:     g.pct ? g.pct + '%' : '',
+        Grid_Remarks: g.remarks,
+        Grid_Notes:   g.notes,
+        Grid_Status:  g.status,
+        _form:        'Report-Remarks',
+        _subject:     `Report & Remarks — ${g.name} | ${missionDate}`,
+      };
+      return fetch(submitUrl, { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'text/plain' } });
+    });
+
+    try {
+      const results = await Promise.all(promises);
+      const allOk   = results.every(r => r.ok);
+      if (allOk) {
+        const total = _pendingGridEntries.length;
+        document.getElementById('success-total').textContent =
+          total + ' grid' + (total !== 1 ? 's' : '') + ' submitted';
+        document.getElementById('success-grid-list').innerHTML = _pendingGridEntries.map(g =>
+          `<li><span class="sgl-name">${g.name}</span>` +
+          `<span class="sgl-pct">${g.pct ? g.pct + '%' : '—'}</span>` +
+          `<span class="sgl-status">${g.status}</span></li>`
+        ).join('');
+        document.getElementById('success-msg').style.display = 'block';
+        ribbonBtn.textContent = 'Submitted';
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      } else {
+        ribbonBtn.textContent = 'Server Error — Retry';
+        ribbonBtn.disabled = false;
+      }
+    } catch (err) {
+      ribbonBtn.textContent = 'Network Error — Retry';
+      ribbonBtn.disabled = false;
+    }
+  }
+
   function resetForm() {
     document.getElementById('grids-container').innerHTML = '';
     document.getElementById('success-msg').style.display = 'none';
@@ -486,9 +648,9 @@
     document.getElementById('pilot-name').value = '';
     document.getElementById('reported-by').value = '';
     document.getElementById('mission-date').value = '';
-    const btn = document.getElementById('ribbon-submit-btn');
-    btn.textContent = 'Submit';
-    btn.disabled = false;
+    const ribbonBtn = document.getElementById('ribbon-submit-btn');
+    ribbonBtn.textContent = 'Submit';
+    ribbonBtn.disabled = false;
     updateGridBadge();
     addGrid();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -496,12 +658,11 @@
 
   document.getElementById('add-grid-btn').addEventListener('click', addGrid);
 
-  /* ── Submit: one row per grid with fixed column names ──────────────────── */
-  document.getElementById('checklist-form').addEventListener('submit', async function (e) {
+  /* ── Submit: validate → show confirm panel (no POST yet) ───────────────── */
+  document.getElementById('checklist-form').addEventListener('submit', function (e) {
     e.preventDefault();
     e.stopImmediatePropagation();
 
-    /* Validate all grid name fields */
     let valid = true;
     document.querySelectorAll('.grid-entry').forEach(entry => {
       const loc  = entry.querySelector('.grid-loc');
@@ -517,76 +678,11 @@
       return;
     }
 
-    const btn = document.getElementById('ribbon-submit-btn');
-    btn.textContent = 'Submitting…';
-    btn.disabled = true;
+    const ribbonBtn = document.getElementById('ribbon-submit-btn');
+    ribbonBtn.textContent = 'Reviewing…';
+    ribbonBtn.disabled = true;
 
-    const pilotName   = document.getElementById('pilot-name').value.trim();
-    const reportedBy  = document.getElementById('reported-by').value.trim();
-    const missionDate = document.getElementById('mission-date').value;
-    const submitUrl   = window.CHECKLIST_CONFIG.submitUrl;
-
-    const promises = [...document.querySelectorAll('.grid-entry')].map(entry => {
-      const loc     = entry.querySelector('.grid-loc').value.trim();
-      const siteRaw = entry.querySelector('.grid-site').value.trim();
-      const gridRaw = entry.querySelector('.grid-grid').value.trim();
-      const site    = /^site/i.test(siteRaw) ? siteRaw : 'Site' + siteRaw;
-      const grid    = /^grid/i.test(gridRaw) ? gridRaw : 'Grid' + gridRaw;
-      const name    = [loc, site, grid].join('-');
-      const pct     = entry.querySelector('.pct-btn.active')?.dataset.pct;
-      const remarks = entry.querySelector('.grid-remarks-ta').value.trim();
-      const notes   = entry.querySelector('.grid-notes').value.trim();
-      const status  = entry.querySelector('.status-btn.active')?.dataset.status || 'In Progress';
-
-      const data = {
-        pilot_name:   pilotName,
-        reported_by:  reportedBy,
-        mission_date: missionDate,
-        Grid_Name:    name,
-        Grid_Pct:     pct ? pct + '%' : '',
-        Grid_Remarks: remarks,
-        Grid_Notes:   notes,
-        Grid_Status:  status,
-        _form:        'Report-Remarks',
-        _subject:     `Report & Remarks — ${name} | ${missionDate}`,
-      };
-      return fetch(submitUrl, { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'text/plain' } });
-    });
-
-    try {
-      const results = await Promise.all(promises);
-      const allOk   = results.every(r => r.ok);
-      if (allOk) {
-        const gridEntries = [...document.querySelectorAll('.grid-entry')].map(entry => {
-          const loc     = entry.querySelector('.grid-loc').value.trim();
-          const siteRaw = entry.querySelector('.grid-site').value.trim();
-          const gridRaw = entry.querySelector('.grid-grid').value.trim();
-          const site    = /^site/i.test(siteRaw) ? siteRaw : 'Site' + siteRaw;
-          const grid    = /^grid/i.test(gridRaw) ? gridRaw : 'Grid' + gridRaw;
-          const name    = [loc, site, grid].join('-');
-          const pct     = entry.querySelector('.pct-btn.active')?.dataset.pct;
-          const status  = entry.querySelector('.status-btn.active')?.dataset.status || 'In Progress';
-          return { name, pct, status };
-        });
-        const total = gridEntries.length;
-        document.getElementById('success-total').textContent =
-          total + ' grid' + (total !== 1 ? 's' : '') + ' submitted';
-        document.getElementById('success-grid-list').innerHTML = gridEntries.map(g =>
-          `<li><span class="sgl-name">${g.name}</span>` +
-          `<span class="sgl-pct">${g.pct ? g.pct + '%' : '—'}</span>` +
-          `<span class="sgl-status">${g.status}</span></li>`
-        ).join('');
-        document.getElementById('success-msg').style.display = 'block';
-        btn.textContent = 'Submitted';
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-      } else {
-        btn.textContent = 'Server Error — Retry';
-        btn.disabled = false;
-      }
-    } catch (err) {
-      btn.textContent = 'Network Error — Retry';
-      btn.disabled = false;
-    }
+    showConfirmPanel(collectGridEntries());
   }, true);
 </script>
 
