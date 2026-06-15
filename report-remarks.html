@@ -248,14 +248,6 @@
     .sgl-name   { font-weight: 700; }
     .sgl-pct    { color: #1e7e4a; font-weight: 600; font-size: 0.78rem; }
     .sgl-status { color: #5a7385; font-size: 0.75rem; }
-    .submit-again-btn {
-      display: inline-block; padding: 9px 22px;
-      background: #25567a; color: white; border: none; border-radius: 6px;
-      font-size: 0.85rem; font-weight: 700; cursor: pointer; font-family: inherit;
-      transition: background 0.15s; margin-top: 4px;
-    }
-    .submit-again-btn:hover { background: #1e4460; }
-
     @media (max-width: 560px) {
       .grid-name-section { padding: 12px 14px 14px; }
       .pct-row           { padding: 10px 14px; }
@@ -346,7 +338,6 @@
     </div>
     <div class="success-total" id="success-total"></div>
     <ul class="success-grid-list" id="success-grid-list"></ul>
-    <button type="button" class="submit-again-btn" onclick="resetForm()">Submit Another Report</button>
   </div>
 
 </div>
@@ -638,22 +629,6 @@
       ribbonBtn.textContent = 'Network Error — Retry';
       ribbonBtn.disabled = false;
     }
-  }
-
-  function resetForm() {
-    document.getElementById('grids-container').innerHTML = '';
-    document.getElementById('success-msg').style.display = 'none';
-    document.getElementById('success-grid-list').innerHTML = '';
-    document.getElementById('success-total').textContent = '';
-    document.getElementById('pilot-name').value = '';
-    document.getElementById('reported-by').value = '';
-    document.getElementById('mission-date').value = '';
-    const ribbonBtn = document.getElementById('ribbon-submit-btn');
-    ribbonBtn.textContent = 'Submit';
-    ribbonBtn.disabled = false;
-    updateGridBadge();
-    addGrid();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   document.getElementById('add-grid-btn').addEventListener('click', addGrid);
