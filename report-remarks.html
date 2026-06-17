@@ -582,15 +582,19 @@
     document.getElementById('confirm-panel').style.display = 'none';
 
     const ribbonBtn = document.getElementById('ribbon-submit-btn');
-    ribbonBtn.textContent = 'Submitting…';
     ribbonBtn.disabled = true;
 
     const pilotName   = document.getElementById('pilot-name').value.trim();
     const reportedBy  = document.getElementById('reported-by').value.trim();
     const missionDate = document.getElementById('mission-date').value;
     const submitUrl   = window.CHECKLIST_CONFIG.submitUrl;
+    const total       = _pendingGridEntries.length;
 
-    const promises = _pendingGridEntries.map(g => {
+    // Submit one grid at a time — parallel requests cause GAS to drop rows silently
+    const failed = [];
+    for (let i = 0; i < _pendingGridEntries.length; i++) {
+      const g = _pendingGridEntries[i];
+      ribbonBtn.textContent = `Submitting ${i + 1} / ${total}…`;
       const data = {
         pilot_name:   pilotName,
         reported_by:  reportedBy,
@@ -603,31 +607,30 @@
         _form:        'Report-Remarks',
         _subject:     `Report & Remarks — ${g.name} | ${missionDate}`,
       };
-      return fetch(submitUrl, { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'text/plain' } });
-    });
-
-    try {
-      const results = await Promise.all(promises);
-      const allOk   = results.every(r => r.ok);
-      if (allOk) {
-        const total = _pendingGridEntries.length;
-        document.getElementById('success-total').textContent =
-          total + ' grid' + (total !== 1 ? 's' : '') + ' submitted';
-        document.getElementById('success-grid-list').innerHTML = _pendingGridEntries.map(g =>
-          `<li><span class="sgl-name">${g.name}</span>` +
-          `<span class="sgl-pct">${g.pct ? g.pct + '%' : '—'}</span>` +
-          `<span class="sgl-status">${g.status}</span></li>`
-        ).join('');
-        document.getElementById('success-msg').style.display = 'block';
-        ribbonBtn.textContent = 'Submitted';
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-      } else {
-        ribbonBtn.textContent = 'Server Error — Retry';
-        ribbonBtn.disabled = false;
+      try {
+        const res  = await fetch(submitUrl, { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'text/plain' } });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok || json.success === false) failed.push(g.name);
+      } catch (_) {
+        failed.push(g.name);
       }
-    } catch (err) {
-      ribbonBtn.textContent = 'Network Error — Retry';
+    }
+
+    if (failed.length === 0) {
+      document.getElementById('success-total').textContent =
+        total + ' grid' + (total !== 1 ? 's' : '') + ' submitted';
+      document.getElementById('success-grid-list').innerHTML = _pendingGridEntries.map(g =>
+        `<li><span class="sgl-name">${g.name}</span>` +
+        `<span class="sgl-pct">${g.pct ? g.pct + '%' : '—'}</span>` +
+        `<span class="sgl-status">${g.status}</span></li>`
+      ).join('');
+      document.getElementById('success-msg').style.display = 'block';
+      ribbonBtn.textContent = 'Submitted';
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    } else {
+      ribbonBtn.textContent = `${failed.length} grid(s) failed — Retry`;
       ribbonBtn.disabled = false;
+      alert(`These grids failed to save — please retry:\n\n${failed.join('\n')}`);
     }
   }
 
