@@ -188,6 +188,25 @@
     }
     .add-grid-btn:hover { background: #dbeef8; }
 
+    /* ── Two-button split (2nd+ grid) ────────────────────────────────────── */
+    .add-grid-split {
+      display: flex; gap: 8px;
+      margin: 12px 20px 16px; width: calc(100% - 40px);
+    }
+    .add-grid-split .add-grid-btn { flex: 1; margin: 0; width: auto; }
+    .add-grid-dup-btn {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 9px 16px;
+      background: #f0f5fc; border: 1.5px dashed #25567a; border-radius: 6px;
+      color: #1e3a5f; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+      transition: background 0.15s; font-family: inherit;
+    }
+    .add-grid-dup-btn:hover { background: #dce8f0; }
+    @media (max-width: 420px) {
+      .add-grid-split { flex-direction: column; }
+    }
+
     .grid-badge {
       margin-left: auto; background: rgba(255,255,255,0.18);
       border-radius: 20px; padding: 2px 10px; font-size: 0.72rem; font-weight: 600;
@@ -318,6 +337,10 @@
     </div>
     <div id="grids-container"></div>
     <button type="button" class="add-grid-btn" id="add-grid-btn">＋ Add Grid</button>
+    <div class="add-grid-split" id="add-grid-split" style="display:none;">
+      <button type="button" class="add-grid-btn" id="add-blank-btn">＋ Add another grid</button>
+      <button type="button" class="add-grid-dup-btn" id="add-dup-btn">⧉ Duplicate grid</button>
+    </div>
   </div>
 
   <div id="confirm-panel">
@@ -462,6 +485,49 @@
   }
 
   /* ── Grid management ──────────────────────────────────────────────────────── */
+  function duplicateGrid() {
+    const entries = document.querySelectorAll('.grid-entry');
+    if (entries.length === 0) { addGrid(); return; }
+
+    const src = entries[entries.length - 1];
+    const n   = entries.length + 1;
+    const div = document.createElement('div');
+    div.className = 'grid-entry';
+    div.innerHTML = buildGridHTML(n);
+    document.getElementById('grids-container').appendChild(div);
+
+    // Copy % completion
+    const srcPct = src.querySelector('.pct-btn.active');
+    if (srcPct) {
+      div.querySelector(`.pct-btn[data-pct="${srcPct.dataset.pct}"]`)?.classList.add('active');
+    }
+
+    // Copy status (and header highlight)
+    const srcStatus = src.querySelector('.status-btn.active');
+    if (srcStatus) {
+      const statusVal = srcStatus.dataset.status;
+      const destBtn   = div.querySelector(`.status-btn[data-status="${statusVal}"]`);
+      if (destBtn) {
+        div.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+        destBtn.classList.add('active');
+        div.querySelector('.grid-entry-header')
+           .classList.toggle('complete-header', statusVal === 'Grid Completed');
+      }
+    }
+
+    // Copy active remark chips
+    src.querySelectorAll('.remark-item.active').forEach(chip => {
+      div.querySelector(`.remark-item[data-chip="${chip.dataset.chip}"]`)?.classList.add('active');
+    });
+
+    // Copy free-text remarks & notes — Region / Site # / Grid # left blank
+    div.querySelector('.grid-remarks-ta').value = src.querySelector('.grid-remarks-ta').value;
+    div.querySelector('.grid-notes').value       = src.querySelector('.grid-notes').value;
+
+    updateGridBadge();
+    div.querySelector('.grid-loc').focus();
+  }
+
   function addGrid() {
     const n   = document.querySelectorAll('.grid-entry').length + 1;
     const div = document.createElement('div');
@@ -490,6 +556,8 @@
     const badge = document.getElementById('grid-badge');
     badge.textContent = n === 0 ? '0 grids' : n + (n === 1 ? ' grid' : ' grids');
     badge.className   = 'grid-badge' + (n > 0 ? ' has-entries' : '');
+    document.getElementById('add-grid-btn').style.display   = n === 0 ? '' : 'none';
+    document.getElementById('add-grid-split').style.display = n > 0  ? 'flex' : 'none';
   }
 
   /* ── Interactions ─────────────────────────────────────────────────────────── */
@@ -635,6 +703,8 @@
   }
 
   document.getElementById('add-grid-btn').addEventListener('click', addGrid);
+  document.getElementById('add-blank-btn').addEventListener('click', addGrid);
+  document.getElementById('add-dup-btn').addEventListener('click', duplicateGrid);
 
   /* ── Submit: validate → show confirm panel (no POST yet) ───────────────── */
   document.getElementById('checklist-form').addEventListener('submit', function (e) {
